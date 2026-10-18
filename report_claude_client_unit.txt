@@ -1,0 +1,18 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-8.3.3, pluggy-1.7.0 -- /home/sayen/projects/ai-tech-consultant/tech/bin/python3
+cachedir: .pytest_cache
+rootdir: /home/sayen/projects/ai-tech-consultant
+configfile: pytest.ini
+plugins: asyncio-0.24.0, respx-0.21.1, anyio-4.15.1
+asyncio: mode=Mode.AUTO, default_loop_scope=function
+collecting ... collected 7 items
+
+tests/qa/test_claude_client.py::test_unconfigured_raises_when_no_key PASSED [ 14%]
+tests/qa/test_claude_client.py::test_unconfigured_raises_when_no_model PASSED [ 28%]
+tests/qa/test_claude_client.py::test_structured_answer_with_citations PASSED [ 42%]
+tests/qa/test_claude_client.py::test_abstention_when_claude_says_insufficient PASSED [ 57%]
+tests/qa/test_claude_client.py::test_rejects_uncited_answer PASSED       [ 71%]
+tests/qa/test_claude_client.py::test_rejects_invented_chunk_id PASSED    [ 85%]
+tests/qa/test_claude_client.py::test_empty_retrieval_returns_insufficient_without_calling_claude PASSED [100%]
+
+============================== 7 passed in 0.16s ===============================

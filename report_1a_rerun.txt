@@ -1,0 +1,40 @@
+/home/sayen/projects/ai-tech-consultant/tech/lib/python3.12/site-packages/pytest_asyncio/plugin.py:208: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-8.3.3, pluggy-1.7.0 -- /home/sayen/projects/ai-tech-consultant/tech/bin/python3
+cachedir: .pytest_cache
+rootdir: /home/sayen/projects/ai-tech-consultant
+configfile: pytest.ini
+plugins: asyncio-0.24.0, respx-0.21.1, anyio-4.15.1
+asyncio: mode=Mode.AUTO, default_loop_scope=None
+collecting ... collected 18 items
+
+tests/ingestion/test_chunker.py::test_chunks_respect_headings PASSED     [  5%]
+tests/ingestion/test_chunker.py::test_empty_article_no_chunks PASSED     [ 11%]
+tests/ingestion/test_fetcher.py::test_retry_transient_then_success PASSED [ 16%]
+tests/ingestion/test_fetcher.py::test_retry_exhausted_transient PASSED   [ 22%]
+tests/ingestion/test_fetcher.py::test_permanent_404_not_retried PASSED   [ 27%]
+tests/ingestion/test_fetcher.py::test_robots_absent_allows_all PASSED    [ 33%]
+tests/ingestion/test_fetcher.py::test_robots_disallow PASSED             [ 38%]
+tests/ingestion/test_orchestrator.py::test_idempotent_second_run PASSED  [ 44%]
+tests/ingestion/test_orchestrator.py::test_permanent_failure_isolated PASSED [ 50%]
+tests/ingestion/test_orchestrator.py::test_removed_page_deactivates_chunks PASSED [ 55%]
+tests/ingestion/test_orchestrator.py::test_transient_failure_recorded PASSED [ 61%]
+tests/ingestion/test_parser.py::test_parse_article_fields PASSED         [ 66%]
+tests/ingestion/test_parser.py::test_heading_image_association PASSED    [ 72%]
+tests/ingestion/test_sitemap_parser.py::test_parse_urlset PASSED         [ 77%]
+tests/ingestion/test_sitemap_parser.py::test_parse_index PASSED          [ 83%]
+tests/ingestion/test_sitemap_parser.py::test_malformed_xml_raises PASSED [ 88%]
+tests/ingestion/test_sitemap_parser.py::test_dedupe_preserves_order PASSED [ 94%]
+tests/ingestion/test_sitemap_parser.py::test_domain_allowlist PASSED     [100%]
+
+=============================== warnings summary ===============================
+tests/ingestion/test_orchestrator.py: 9 warnings
+tests/ingestion/test_parser.py: 2 warnings
+  /home/sayen/projects/ai-tech-consultant/tech/lib/python3.12/site-packages/bs4/builder/_lxml.py:124: DeprecationWarning: The 'strip_cdata' option of HTMLParser() has never done anything and will eventually be removed.
+    parser = parser(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================= 18 passed, 11 warnings in 15.71s =======================

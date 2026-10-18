@@ -1,0 +1,34 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-8.3.3, pluggy-1.7.0 -- /home/sayen/projects/ai-tech-consultant/tech/bin/python3
+cachedir: .pytest_cache
+rootdir: /home/sayen/projects/ai-tech-consultant
+configfile: pytest.ini
+plugins: asyncio-0.24.0, respx-0.21.1, anyio-4.15.1
+asyncio: mode=Mode.AUTO, default_loop_scope=function
+collecting ... collected 17 items
+
+tests/service/test_auth.py::test_query_without_token_401 PASSED          [  5%]
+tests/service/test_auth.py::test_query_with_bad_token_401 PASSED         [ 11%]
+tests/service/test_auth.py::test_task2_can_query PASSED                  [ 17%]
+tests/service/test_auth.py::test_task2_cannot_run_ingestion PASSED       [ 23%]
+tests/service/test_escalations.py::test_create_and_resolve_escalation PASSED [ 29%]
+tests/service/test_escalations.py::test_resolved_approved_answer_is_retrievable PASSED [ 35%]
+tests/service/test_escalations.py::test_unapproved_answer_is_not_promoted PASSED [ 41%]
+tests/service/test_escalations.py::test_resolve_requires_admin PASSED    [ 47%]
+tests/service/test_escalations.py::test_resolve_missing_escalation_404 PASSED [ 52%]
+tests/service/test_escalations.py::test_multiple_resolutions_increment_version PASSED [ 58%]
+tests/service/test_health.py::test_health_reports_degraded_when_models_mocked PASSED [ 64%]
+tests/service/test_ingestion_jobs.py::test_ingestion_status_idle PASSED  [ 70%]
+tests/service/test_ingestion_jobs.py::test_ingestion_run_requires_admin PASSED [ 76%]
+tests/service/test_ingestion_jobs.py::test_ingestion_run_creates_queued_job PASSED [ 82%]
+tests/service/test_ingestion_jobs.py::test_ingestion_run_duplicate_returns_already_running PASSED [ 88%]
+tests/service/test_query.py::test_query_malformed_422 PASSED             [ 94%]
+tests/service/test_query.py::test_query_returns_insufficient_evidence_when_no_data PASSED [100%]
+
+=============================== warnings summary ===============================
+tech/lib/python3.12/site-packages/starlette/testclient.py:40
+  /home/sayen/projects/ai-tech-consultant/tech/lib/python3.12/site-packages/starlette/testclient.py:40: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = typing.Callable[[], typing.ContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================== 17 passed, 1 warning in 8.55s =========================

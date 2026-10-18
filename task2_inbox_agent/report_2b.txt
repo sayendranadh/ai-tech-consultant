@@ -1,0 +1,55 @@
+
+> task2-inbox-agent@0.1.0 test
+> vitest run
+
+
+[1m[30m[46m RUN [49m[39m[22m [36mv4.1.12 [39m[90m/home/sayen/projects/ai-tech-consultant/task2_inbox_agent[39m
+
+ [32m✓[39m tests/dataset_coverage.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 33[2mms[22m[39m
+ [32m✓[39m tests/safeguards.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 18[2mms[22m[39m
+ [32m✓[39m tests/delivery_adapter.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 24[2mms[22m[39m
+ [32m✓[39m tests/compare.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 19[2mms[22m[39m
+ [32m✓[39m tests/test_schemas.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 16[2mms[22m[39m
+ [32m✓[39m tests/autonomy_admin.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 39[2mms[22m[39m
+ [32m✓[39m tests/duplicate_event.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 39[2mms[22m[39m
+ [32m✓[39m tests/review_ui.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 26[2mms[22m[39m
+ [32m✓[39m tests/idempotency.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 34[2mms[22m[39m
+ [32m✓[39m tests/classification.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 15[2mms[22m[39m
+ [32m✓[39m tests/feedback.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 33[2mms[22m[39m
+ [32m✓[39m tests/kb_client.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 110[2mms[22m[39m
+ [32m✓[39m tests/pipeline_insufficient_evidence.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 57[2mms[22m[39m
+ [31m❯[39m tests/review_service.test.ts [2m([22m[2m9 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 92[2mms[22m[39m
+     [32m✓[39m approve with unchanged text increments counter[32m 26[2mms[22m[39m
+     [32m✓[39m approve with edited text does NOT increment (edit path)[32m 3[2mms[22m[39m
+[31m     [31m×[31m approve on failing adapter does NOT increment[39m[32m 14[2mms[22m[39m
+     [32m✓[39m reject resets counter[32m 3[2mms[22m[39m
+     [32m✓[39m escalate resets counter[32m 3[2mms[22m[39m
+     [32m✓[39m category isolation: how_to count does not affect troubleshooting[32m 3[2mms[22m[39m
+     [32m✓[39m duplicate delivery of same draft does not double-count[32m 3[2mms[22m[39m
+     [32m✓[39m high-risk category never eligible[32m 17[2mms[22m[39m
+     [32m✓[39m reaches exact 20 -> eligible; 19 -> not eligible[32m 13[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m tests/review_service.test.ts[2m > [22mReviewService — qualify on approve without edit[2m > [22mapprove on failing adapter does NOT increment
+[31m[1mAssertionError[22m: expected 'delivery_not_successful' to be 'delivery_failed' // Object.is equality[39m
+
+Expected: [32m"delivery_[7mfailed[27m"[39m
+Received: [31m"delivery_[7mnot_successful[27m"[39m
+
+[36m [2m❯[22m tests/review_service.test.ts:[2m73:35[22m[39m
+    [90m 71|[39m     })[33m;[39m
+    [90m 72|[39m     [34mexpect[39m(r[33m.[39mqualifying)[33m.[39m[34mtoBe[39m([35mfalse[39m)[33m;[39m
+    [90m 73|[39m     [34mexpect[39m(r[33m.[39mdisqualified_reason)[33m.[39m[34mtoBe[39m([32m"delivery_failed"[39m)[33m;[39m
+    [90m   |[39m                                   [31m^[39m
+    [90m 74|[39m     [34mexpect[39m([34mgetCounter[39m(db[33m,[39m [32m"how_to"[39m)[33m.[39mcurrent_count)[33m.[39m[34mtoBe[39m([34m0[39m)[33m;[39m
+    [90m 75|[39m   })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m13 passed[39m[22m[90m (14)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m43 passed[39m[22m[90m (44)[39m
+[2m   Start at [22m 09:08:45
+[2m   Duration [22m 926ms[2m (transform 2.73s, setup 0ms, import 4.23s, tests 557ms, environment 4ms)[22m
+

@@ -1,0 +1,26 @@
+{
+  "REQ-meeting_1_website-001": [
+    {"task": "requirements_clarification", "low": 2, "likely": 4, "high": 8, "rationale": "Confirm brand assets and layout references.", "assumptions": ["Brand assets delivered before kickoff"], "dependencies": []},
+    {"task": "technical_design", "low": 4, "likely": 8, "high": 16, "rationale": "Design responsive homepage structure.", "assumptions": [], "dependencies": ["REQ-meeting_1_website-001"]},
+    {"task": "frontend_implementation", "low": 16, "likely": 28, "high": 48, "rationale": "Build and style the homepage.", "assumptions": ["Existing design system reused"], "dependencies": ["technical_design"]},
+    {"task": "testing", "low": 4, "likely": 8, "high": 12, "rationale": "Cross-browser QA.", "assumptions": [], "dependencies": ["frontend_implementation"]}
+  ],
+  "REQ-meeting_1_website-002": [
+    {"task": "technical_design", "low": 2, "likely": 4, "high": 6, "rationale": "Design contact form fields and routing.", "assumptions": [], "dependencies": []},
+    {"task": "backend_implementation", "low": 4, "likely": 8, "high": 16, "rationale": "Wire routing to sales team inbox.", "assumptions": ["Sales inbox confirmed"], "dependencies": ["technical_design"]},
+    {"task": "testing", "low": 2, "likely": 4, "high": 6, "rationale": "Submission and delivery QA.", "assumptions": [], "dependencies": ["backend_implementation"]}
+  ],
+  "REQ-meeting_3_followup-001": [
+    {"task": "requirements_clarification", "low": 1, "likely": 2, "high": 4, "rationale": "Confirm support team inbox.", "assumptions": [], "dependencies": []},
+    {"task": "backend_implementation", "low": 2, "likely": 3, "high": 6, "rationale": "Change routing target.", "assumptions": [], "dependencies": ["requirements_clarification"]}
+  ],
+  "REQ-meeting_3_followup-002": [
+    {"task": "requirements_clarification", "low": 2, "likely": 4, "high": 8, "rationale": "Clarify newsletter platform.", "assumptions": [], "dependencies": []},
+    {"task": "technical_design", "low": 4, "likely": 8, "high": 16, "rationale": "Design widget and integration.", "assumptions": [], "dependencies": ["requirements_clarification"]},
+    {"task": "frontend_implementation", "low": 6, "likely": 12, "high": 20, "rationale": "Build widget in footer.", "assumptions": [], "dependencies": ["technical_design"]},
+    {"task": "integration", "low": 4, "likely": 8, "high": 16, "rationale": "Connect to newsletter provider.", "assumptions": ["Provider selected by client"], "dependencies": ["frontend_implementation"]}
+  ],
+  "REQ-meeting_3_followup-003": [
+    {"task": "testing", "low": 2, "likely": 4, "high": 6, "rationale": "Re-verify homepage after deadline change.", "assumptions": [], "dependencies": []}
+  ]
+}

@@ -1,0 +1,183 @@
+/home/sayen/projects/ai-tech-consultant/tech/lib/python3.12/site-packages/pytest_asyncio/plugin.py:208: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-8.3.3, pluggy-1.7.0 -- /home/sayen/projects/ai-tech-consultant/tech/bin/python3
+cachedir: .pytest_cache
+rootdir: /home/sayen/projects/ai-tech-consultant
+configfile: pytest.ini
+plugins: asyncio-0.24.0, respx-0.21.1, anyio-4.15.1
+asyncio: mode=Mode.AUTO, default_loop_scope=None
+collecting ... collected 17 items
+
+tests/ingestion/test_chunker.py::test_chunks_respect_headings PASSED     [  5%]
+tests/ingestion/test_chunker.py::test_empty_article_no_chunks PASSED     [ 11%]
+tests/ingestion/test_fetcher.py::test_retry_transient_then_success PASSED [ 17%]
+tests/ingestion/test_fetcher.py::test_retry_exhausted_transient PASSED   [ 23%]
+tests/ingestion/test_fetcher.py::test_permanent_404_not_retried PASSED   [ 29%]
+tests/ingestion/test_fetcher.py::test_robots_absent_allows_all PASSED    [ 35%]
+tests/ingestion/test_fetcher.py::test_robots_disallow PASSED             [ 41%]
+tests/ingestion/test_orchestrator.py::test_idempotent_second_run FAILED  [ 47%]
+tests/ingestion/test_orchestrator.py::test_permanent_failure_isolated FAILED [ 52%]
+tests/ingestion/test_orchestrator.py::test_removed_page_deactivates_chunks FAILED [ 58%]
+tests/ingestion/test_parser.py::test_parse_article_fields PASSED         [ 64%]
+tests/ingestion/test_parser.py::test_heading_image_association PASSED    [ 70%]
+tests/ingestion/test_sitemap_parser.py::test_parse_urlset FAILED         [ 76%]
+tests/ingestion/test_sitemap_parser.py::test_parse_index FAILED          [ 82%]
+tests/ingestion/test_sitemap_parser.py::test_malformed_xml_raises PASSED [ 88%]
+tests/ingestion/test_sitemap_parser.py::test_dedupe_preserves_order FAILED [ 94%]
+tests/ingestion/test_sitemap_parser.py::test_domain_allowlist PASSED     [100%]
+
+=================================== FAILURES ===================================
+__________________________ test_idempotent_second_run __________________________
+
+tmp_path = PosixPath('/tmp/pytest-of-sayen/pytest-0/test_idempotent_second_run0')
+
+    @pytest.mark.asyncio
+    async def test_idempotent_second_run(tmp_path):
+        cfg = IngestionConfig(KB_DB_PATH=tmp_path / "kb.sqlite3", KB_MAX_RETRIES=1, KB_BACKOFF_BASE_SECONDS=0.001, KB_BACKOFF_MAX_SECONDS=0.01)
+        transport = _mock_transport((FIX / "sitemap_index.xml").read_bytes(), (FIX / "article_a.html").read_bytes())
+        # Monkey-patch by constructing fetcher inside run_ingestion — we patch httpx.AsyncClient globally here.
+        import task1_knowledge_brain.ingestion.fetcher as fetcher_mod
+        original = fetcher_mod.httpx.AsyncClient
+        fetcher_mod.httpx.AsyncClient = lambda **kw: original(transport=transport, headers=kw.get("headers", {}), timeout=kw.get("timeout"))
+        try:
+            r1 = await run_ingestion(cfg)
+            store = ManifestStore(cfg.db_path)
+            with store._conn() as con:
+>               docs_1 = con.execute("SELECT COUNT(*) c FROM documents").fetchone()["c"]
+E               TypeError: tuple indices must be integers or slices, not str
+
+tests/ingestion/test_orchestrator.py:44: TypeError
+_______________________ test_permanent_failure_isolated ________________________
+
+tmp_path = PosixPath('/tmp/pytest-of-sayen/pytest-0/test_permanent_failure_isolate0')
+
+    @pytest.mark.asyncio
+    async def test_permanent_failure_isolated(tmp_path):
+        cfg = IngestionConfig(KB_DB_PATH=tmp_path / "kb.sqlite3", KB_MAX_RETRIES=1, KB_BACKOFF_BASE_SECONDS=0.001, KB_BACKOFF_MAX_SECONDS=0.01)
+        pages = (FIX / "sitemap_pages.xml").read_bytes()
+        # article/a works, article/b returns 404
+        transport = _mock_transport(
+            (FIX / "sitemap_index.xml").read_bytes(),
+            (FIX / "article_a.html").read_bytes(),
+            status_by_url={"https://support.brilliantdirectories.com/article/b": 404},
+        )
+        import task1_knowledge_brain.ingestion.fetcher as fetcher_mod
+        original = fetcher_mod.httpx.AsyncClient
+        fetcher_mod.httpx.AsyncClient = lambda **kw: original(transport=transport, headers=kw.get("headers", {}), timeout=kw.get("timeout"))
+        try:
+            report = await run_ingestion(cfg)
+        finally:
+            fetcher_mod.httpx.AsyncClient = original
+>       assert report.counts["failed_permanent"] == 1
+E       assert 0 == 1
+
+tests/ingestion/test_orchestrator.py:74: AssertionError
+_____________________ test_removed_page_deactivates_chunks _____________________
+
+tmp_path = PosixPath('/tmp/pytest-of-sayen/pytest-0/test_removed_page_deactivates_0')
+
+    @pytest.mark.asyncio
+    async def test_removed_page_deactivates_chunks(tmp_path):
+        cfg = IngestionConfig(KB_DB_PATH=tmp_path / "kb.sqlite3", KB_MAX_RETRIES=1, KB_BACKOFF_BASE_SECONDS=0.001, KB_BACKOFF_MAX_SECONDS=0.01)
+        full_pages = (FIX / "sitemap_pages.xml").read_bytes()
+        only_a = b"""<?xml version="1.0"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>https://support.brilliantdirectories.com/article/a</loc></url></urlset>"""
+    
+        import task1_knowledge_brain.ingestion.fetcher as fetcher_mod
+        original = fetcher_mod.httpx.AsyncClient
+    
+        # Run 1 with two pages
+        transport1 = _mock_transport((FIX / "sitemap_index.xml").read_bytes(), (FIX / "article_a.html").read_bytes())
+        fetcher_mod.httpx.AsyncClient = lambda **kw: original(transport=transport1, headers=kw.get("headers", {}), timeout=kw.get("timeout"))
+        try:
+            await run_ingestion(cfg)
+        finally:
+            fetcher_mod.httpx.AsyncClient = original
+    
+        # Run 2 with only one page in the child sitemap
+        async def handler2(request):
+            url = str(request.url)
+            if url.endswith("sitemap.xml"):
+                return httpx.Response(200, content=(FIX / "sitemap_index.xml").read_bytes())
+            if url.endswith("sitemap_pages.xml"):
+                return httpx.Response(200, content=only_a)
+            if url.endswith("/robots.txt"):
+                return httpx.Response(404)
+            return httpx.Response(200, content=(FIX / "article_a.html").read_bytes())
+    
+        transport2 = httpx.MockTransport(handler2)
+        fetcher_mod.httpx.AsyncClient = lambda **kw: original(transport=transport2, headers=kw.get("headers", {}), timeout=kw.get("timeout"))
+        try:
+            report = await run_ingestion(cfg)
+        finally:
+            fetcher_mod.httpx.AsyncClient = original
+    
+>       assert report.counts["removed"] == 1
+E       assert 0 == 1
+
+tests/ingestion/test_orchestrator.py:118: AssertionError
+______________________________ test_parse_urlset _______________________________
+
+    def test_parse_urlset():
+        parsed = parse_sitemap_xml((FIX / "sitemap_pages.xml").read_bytes())
+        assert parsed.kind == "urlset"
+>       assert len(parsed.urls) == 2
+E       AssertionError: assert 0 == 2
+E        +  where 0 = len([])
+E        +    where [] = ParsedSitemap(kind='urlset', urls=[], children=[]).urls
+
+tests/ingestion/test_sitemap_parser.py:18: AssertionError
+_______________________________ test_parse_index _______________________________
+
+    def test_parse_index():
+        parsed = parse_sitemap_xml((FIX / "sitemap_index.xml").read_bytes())
+        assert parsed.kind == "sitemapindex"
+>       assert len(parsed.children) == 1
+E       AssertionError: assert 0 == 1
+E        +  where 0 = len([])
+E        +    where [] = ParsedSitemap(kind='sitemapindex', urls=[], children=[]).children
+
+tests/ingestion/test_sitemap_parser.py:27: AssertionError
+_________________________ test_dedupe_preserves_order __________________________
+
+    def test_dedupe_preserves_order():
+        parsed = parse_sitemap_xml((FIX / "sitemap_pages.xml").read_bytes())
+        doubled = parsed.urls + parsed.urls
+        deduped = dedupe_urls(doubled)
+>       assert len(deduped) == 2
+E       assert 0 == 2
+E        +  where 0 = len([])
+
+tests/ingestion/test_sitemap_parser.py:40: AssertionError
+=============================== warnings summary ===============================
+tests/ingestion/test_orchestrator.py::test_idempotent_second_run
+tests/ingestion/test_orchestrator.py::test_permanent_failure_isolated
+tests/ingestion/test_orchestrator.py::test_removed_page_deactivates_chunks
+tests/ingestion/test_orchestrator.py::test_removed_page_deactivates_chunks
+tests/ingestion/test_sitemap_parser.py::test_parse_index
+  /home/sayen/projects/ai-tech-consultant/task1_knowledge_brain/ingestion/sitemap_parser.py:71: DeprecationWarning: Testing an element's truth value will raise an exception in future versions.  Use specific 'len(elem)' or 'elem is not None' test instead.
+    loc_el = sm_el.find("sm:loc", NS) or sm_el.find("loc")
+
+tests/ingestion/test_parser.py::test_parse_article_fields
+tests/ingestion/test_parser.py::test_heading_image_association
+  /home/sayen/projects/ai-tech-consultant/tech/lib/python3.12/site-packages/bs4/builder/_lxml.py:124: DeprecationWarning: The 'strip_cdata' option of HTMLParser() has never done anything and will eventually be removed.
+    parser = parser(
+
+tests/ingestion/test_sitemap_parser.py::test_parse_urlset
+tests/ingestion/test_sitemap_parser.py::test_parse_urlset
+tests/ingestion/test_sitemap_parser.py::test_dedupe_preserves_order
+tests/ingestion/test_sitemap_parser.py::test_dedupe_preserves_order
+  /home/sayen/projects/ai-tech-consultant/task1_knowledge_brain/ingestion/sitemap_parser.py:61: DeprecationWarning: Testing an element's truth value will raise an exception in future versions.  Use specific 'len(elem)' or 'elem is not None' test instead.
+    loc_el = url_el.find("sm:loc", NS) or url_el.find("loc")
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/ingestion/test_orchestrator.py::test_idempotent_second_run - Typ...
+FAILED tests/ingestion/test_orchestrator.py::test_permanent_failure_isolated
+FAILED tests/ingestion/test_orchestrator.py::test_removed_page_deactivates_chunks
+FAILED tests/ingestion/test_sitemap_parser.py::test_parse_urlset - AssertionE...
+FAILED tests/ingestion/test_sitemap_parser.py::test_parse_index - AssertionEr...
+FAILED tests/ingestion/test_sitemap_parser.py::test_dedupe_preserves_order - ...
+================== 6 failed, 11 passed, 11 warnings in 4.73s ===================

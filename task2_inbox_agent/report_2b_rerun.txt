@@ -1,0 +1,78 @@
+
+> task2-inbox-agent@0.1.0 test
+> vitest run
+
+
+[1m[30m[46m RUN [49m[39m[22m [36mv4.1.12 [39m[90m/home/sayen/projects/ai-tech-consultant/task2_inbox_agent[39m
+
+ [32m✓[39m tests/dataset_coverage.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+ [31m❯[39m tests/review_ui.test.ts [2m([22m[2m0 test[22m[2m)[22m
+ [31m❯[39m tests/feedback.test.ts [2m([22m[2m0 test[22m[2m)[22m
+ [31m❯[39m tests/idempotency.test.ts [2m([22m[2m0 test[22m[2m)[22m
+ [32m✓[39m tests/delivery_adapter.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32m✓[39m tests/compare.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32m✓[39m tests/safeguards.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+ [31m❯[39m tests/review_service.test.ts [2m([22m[2m0 test[22m[2m)[22m
+ [32m✓[39m tests/test_schemas.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32m✓[39m tests/kb_client.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 44[2mms[22m[39m
+ [32m✓[39m tests/classification.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m tests/duplicate_event.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 22[2mms[22m[39m
+ [31m❯[39m tests/pipeline_insufficient_evidence.test.ts [2m([22m[2m0 test[22m[2m)[22m
+ [32m✓[39m tests/autonomy_admin.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 23[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Suites 5 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m tests/feedback.test.ts[2m [ tests/feedback.test.ts ][22m
+[41m[1m FAIL [22m[49m tests/idempotency.test.ts[2m [ tests/idempotency.test.ts ][22m
+[41m[1m FAIL [22m[49m tests/review_service.test.ts[2m [ tests/review_service.test.ts ][22m
+[41m[1m FAIL [22m[49m tests/review_ui.test.ts[2m [ tests/review_ui.test.ts ][22m
+[31m[1mError[22m: Transform failed with 1 error:
+
+[31m[PARSE_ERROR] [0mExpected `,` or `)` but found `:`
+   [38;5;246m╭[0m[38;5;246m─[0m[38;5;246m[[0m src/persistence/dao.ts:1:23 [38;5;246m][0m
+   [38;5;246m│[0m
+ [38;5;246m1 │[0m [38;5;249m [0m[38;5;249m [0m[38;5;249mi[0m[38;5;249mn[0m[38;5;249ms[0m[38;5;249me[0m[38;5;249mr[0m[38;5;249mt[0m[38;5;249mA[0m[38;5;249mp[0m[38;5;249mp[0m[38;5;249mr[0m[38;5;249mo[0m[38;5;249mv[0m[38;5;249ma[0m[38;5;249ml[0m([38;5;249mi[0m[38;5;249mn[0m[38;5;249mp[0m[38;5;249mu[0m[38;5;249mt[0m:[38;5;249m [0m[38;5;249m{[0m
+ [38;5;240m  │[0m                 ┬     ┬  
+ [38;5;240m  │[0m                 ╰──────── Opened here
+ [38;5;240m  │[0m                       │  
+ [38;5;240m  │[0m                       ╰── `,` or `)` expected
+[38;5;246m───╯[0m
+[39m
+  Plugin: [35mvite:oxc[39m
+  File: [36m/home/sayen/projects/ai-tech-consultant/task2_inbox_agent/src/persistence/dao.ts[39m
+[90m [2m❯[22m transformWithOxc node_modules/vite/dist/node/chunks/node.js:[2m7581:19[22m[39m
+[90m [2m❯[22m TransformPluginContext.transform node_modules/vite/dist/node/chunks/node.js:[2m7653:26[22m[39m
+[90m [2m❯[22m EnvironmentPluginContainer.transform node_modules/vite/dist/node/chunks/node.js:[2m8545:51[22m[39m
+[90m [2m❯[22m loadAndTransform node_modules/vite/dist/node/chunks/node.js:[2m20184:26[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/pipeline_insufficient_evidence.test.ts[2m [ tests/pipeline_insufficient_evidence.test.ts ][22m
+[31m[1mError[22m: Transform failed with 1 error:
+
+[31m[PARSE_ERROR] [0mExpected `,` or `)` but found `:`
+   [38;5;246m╭[0m[38;5;246m─[0m[38;5;246m[[0m src/persistence/dao.ts:1:23 [38;5;246m][0m
+   [38;5;246m│[0m
+ [38;5;246m1 │[0m [38;5;249m [0m[38;5;249m [0m[38;5;249mi[0m[38;5;249mn[0m[38;5;249ms[0m[38;5;249me[0m[38;5;249mr[0m[38;5;249mt[0m[38;5;249mA[0m[38;5;249mp[0m[38;5;249mp[0m[38;5;249mr[0m[38;5;249mo[0m[38;5;249mv[0m[38;5;249ma[0m[38;5;249ml[0m([38;5;249mi[0m[38;5;249mn[0m[38;5;249mp[0m[38;5;249mu[0m[38;5;249mt[0m:[38;5;249m [0m[38;5;249m{[0m
+ [38;5;240m  │[0m                 ┬     ┬  
+ [38;5;240m  │[0m                 ╰──────── Opened here
+ [38;5;240m  │[0m                       │  
+ [38;5;240m  │[0m                       ╰── `,` or `)` expected
+[38;5;246m───╯[0m
+[39m
+  Plugin: [35mvite:oxc[39m
+  File: [36m/home/sayen/projects/ai-tech-consultant/task2_inbox_agent/src/persistence/dao.ts[39m
+[90m [2m❯[22m transformWithOxc node_modules/vite/dist/node/chunks/node.js:[2m7581:19[22m[39m
+[90m [2m❯[22m TransformPluginContext.transform node_modules/vite/dist/node/chunks/node.js:[2m7653:26[22m[39m
+[90m [2m❯[22m EnvironmentPluginContainer.transform node_modules/vite/dist/node/chunks/node.js:[2m8545:51[22m[39m
+[90m [2m❯[22m loadAndTransform node_modules/vite/dist/node/chunks/node.js:[2m20184:26[22m[39m
+[90m [2m❯[22m fetchModule node_modules/vite/dist/node/chunks/node.js:[2m36165:15[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m5 failed[39m[22m[2m | [22m[1m[32m9 passed[39m[22m[90m (14)[39m
+[2m      Tests [22m [1m[32m28 passed[39m[22m[90m (28)[39m
+[2m   Start at [22m 09:10:57
+[2m   Duration [22m 694ms[2m (transform 2.10s, setup 0ms, import 1.97s, tests 137ms, environment 2ms)[22m
+

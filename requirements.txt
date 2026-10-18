@@ -1,0 +1,43 @@
+# Core HTTP
+httpx==0.27.2
+tenacity==9.0.0
+
+# HTML / XML parsing
+trafilatura==1.12.2
+beautifulsoup4==4.12.3
+lxml==5.3.0
+
+# Pydantic for schemas (also used by FastAPI in 1C)
+pydantic==2.9.2
+pydantic-settings==2.6.0
+
+# SQLite FTS5 is built-in; no package needed. sqlite-vec added in 1B.
+
+# Testing
+pytest==8.3.3
+pytest-asyncio==0.24.0
+respx==0.21.1
+
+# --- Milestone 1B additions ---
+sentence-transformers==3.2.1
+sqlite-vec==0.1.6
+numpy==2.1.3
+
+# --- Milestone 1C additions ---
+fastapi==0.115.4
+uvicorn[standard]==0.32.0
+python-multipart==0.0.12
+
+# --- Milestone 1D additions ---
+apscheduler==3.10.4
+sqlalchemy==2.0.36
+
+# --- Milestone 3A additions ---
+pydantic-settings==2.6.0   # already present via Task 1; safe to re-list
+python-multipart==0.0.12   # already present; safe to re-list
+
+# --- Live Claude QA (Task 1) ---
+# Required by task1_knowledge_brain.qa.claude_client.ClaudeQAClient.
+# Not installed by default in earlier milestones because the QA path was
+# mocked. Required for any live /query to succeed.
+anthropic==0.40.0

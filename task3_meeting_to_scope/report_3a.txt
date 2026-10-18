@@ -1,0 +1,366 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-8.3.3, pluggy-1.7.0 -- /home/sayen/projects/ai-tech-consultant/tech/bin/python3
+cachedir: .pytest_cache
+rootdir: /home/sayen/projects/ai-tech-consultant/task3_meeting_to_scope
+configfile: pytest.ini
+testpaths: tests
+plugins: asyncio-0.24.0, respx-0.21.1, anyio-4.15.1
+asyncio: mode=Mode.AUTO, default_loop_scope=function
+collecting ... collected 18 items
+
+tests/test_api.py::test_health PASSED                                    [  5%]
+tests/test_api.py::test_ingest_and_view FAILED                           [ 11%]
+tests/test_api.py::test_unknown_project_returns_empty_view PASSED        [ 16%]
+tests/test_chunker.py::test_short_transcript_single_chunk PASSED         [ 22%]
+tests/test_chunker.py::test_long_transcript_splits_with_overlap PASSED   [ 27%]
+tests/test_extractor_mock.py::test_mock_extractor_returns_expected_records_for_meeting_1 FAILED [ 33%]
+tests/test_extractor_mock.py::test_mock_extractor_records_have_source_refs FAILED [ 38%]
+tests/test_loader.py::test_load_meeting_1 FAILED                         [ 44%]
+tests/test_loader.py::test_load_meeting_2 FAILED                         [ 50%]
+tests/test_loader.py::test_load_meeting_3 FAILED                         [ 55%]
+tests/test_merge_conflicts.py::test_meeting_1_merge_creates_two_requirements_and_one_commitment FAILED [ 61%]
+tests/test_merge_conflicts.py::test_followup_deadline_conflict_detected FAILED [ 66%]
+tests/test_merge_conflicts.py::test_meeting_2_open_question_carrier FAILED [ 72%]
+tests/test_schemas.py::test_requirement_requires_source_ref PASSED       [ 77%]
+tests/test_schemas.py::test_requirement_valid PASSED                     [ 83%]
+tests/test_schemas.py::test_transcript_roundtrip PASSED                  [ 88%]
+tests/test_validate_claims.py::test_all_client_stated_requirements_validate_cleanly FAILED [ 94%]
+tests/test_validate_claims.py::test_bad_quote_is_flagged FAILED          [100%]
+
+=================================== FAILURES ===================================
+_____________________________ test_ingest_and_view _____________________________
+
+client = <starlette.testclient.TestClient object at 0x75dfdd7ee2d0>
+
+    def test_ingest_and_view(client):
+>       t = load_transcript(T_DIR / "meeting_1_website.md")
+
+tests/test_api.py:28: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/ingestion/loader.py:26: in load_transcript
+    text = path.read_text(encoding="utf-8")
+/usr/lib/python3.12/pathlib.py:1029: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/home/sayen/projects/ai-tech-consultant/task3_meeting_to_scope/data/transcripts/meeting_1_website.md')
+mode = 'r', buffering = -1, encoding = 'utf-8', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+E       FileNotFoundError: [Errno 2] No such file or directory: '/home/sayen/projects/ai-tech-consultant/task3_meeting_to_scope/data/transcripts/meeting_1_website.md'
+
+/usr/lib/python3.12/pathlib.py:1015: FileNotFoundError
+__________ test_mock_extractor_returns_expected_records_for_meeting_1 __________
+
+    def test_mock_extractor_returns_expected_records_for_meeting_1():
+>       tr = load_transcript(T_DIR / "meeting_1_website.md")
+
+tests/test_extractor_mock.py:11: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/ingestion/loader.py:26: in load_transcript
+    text = path.read_text(encoding="utf-8")
+/usr/lib/python3.12/pathlib.py:1029: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/home/sayen/projects/ai-tech-consultant/task3_meeting_to_scope/data/transcripts/meeting_1_website.md')
+mode = 'r', buffering = -1, encoding = 'utf-8', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+E       FileNotFoundError: [Errno 2] No such file or directory: '/home/sayen/projects/ai-tech-consultant/task3_meeting_to_scope/data/transcripts/meeting_1_website.md'
+
+/usr/lib/python3.12/pathlib.py:1015: FileNotFoundError
+_________________ test_mock_extractor_records_have_source_refs _________________
+
+    def test_mock_extractor_records_have_source_refs():
+>       tr = load_transcript(T_DIR / "meeting_2_ecommerce.md")
+
+tests/test_extractor_mock.py:25: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/ingestion/loader.py:26: in load_transcript
+    text = path.read_text(encoding="utf-8")
+/usr/lib/python3.12/pathlib.py:1029: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/home/sayen/projects/ai-tech-consultant/task3_meeting_to_scope/data/transcripts/meeting_2_ecommerce.md')
+mode = 'r', buffering = -1, encoding = 'utf-8', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+E       FileNotFoundError: [Errno 2] No such file or directory: '/home/sayen/projects/ai-tech-consultant/task3_meeting_to_scope/data/transcripts/meeting_2_ecommerce.md'
+
+/usr/lib/python3.12/pathlib.py:1015: FileNotFoundError
+_____________________________ test_load_meeting_1 ______________________________
+
+    def test_load_meeting_1():
+>       t = load_transcript(T_DIR / "meeting_1_website.md")
+
+tests/test_loader.py:8: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/ingestion/loader.py:26: in load_transcript
+    text = path.read_text(encoding="utf-8")
+/usr/lib/python3.12/pathlib.py:1029: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/home/sayen/projects/ai-tech-consultant/task3_meeting_to_scope/data/transcripts/meeting_1_website.md')
+mode = 'r', buffering = -1, encoding = 'utf-8', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+E       FileNotFoundError: [Errno 2] No such file or directory: '/home/sayen/projects/ai-tech-consultant/task3_meeting_to_scope/data/transcripts/meeting_1_website.md'
+
+/usr/lib/python3.12/pathlib.py:1015: FileNotFoundError
+_____________________________ test_load_meeting_2 ______________________________
+
+    def test_load_meeting_2():
+>       t = load_transcript(T_DIR / "meeting_2_ecommerce.md")
+
+tests/test_loader.py:17: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/ingestion/loader.py:26: in load_transcript
+    text = path.read_text(encoding="utf-8")
+/usr/lib/python3.12/pathlib.py:1029: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/home/sayen/projects/ai-tech-consultant/task3_meeting_to_scope/data/transcripts/meeting_2_ecommerce.md')
+mode = 'r', buffering = -1, encoding = 'utf-8', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+E       FileNotFoundError: [Errno 2] No such file or directory: '/home/sayen/projects/ai-tech-consultant/task3_meeting_to_scope/data/transcripts/meeting_2_ecommerce.md'
+
+/usr/lib/python3.12/pathlib.py:1015: FileNotFoundError
+_____________________________ test_load_meeting_3 ______________________________
+
+    def test_load_meeting_3():
+>       t = load_transcript(T_DIR / "meeting_3_followup.md")
+
+tests/test_loader.py:23: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/ingestion/loader.py:26: in load_transcript
+    text = path.read_text(encoding="utf-8")
+/usr/lib/python3.12/pathlib.py:1029: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/home/sayen/projects/ai-tech-consultant/task3_meeting_to_scope/data/transcripts/meeting_3_followup.md')
+mode = 'r', buffering = -1, encoding = 'utf-8', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+E       FileNotFoundError: [Errno 2] No such file or directory: '/home/sayen/projects/ai-tech-consultant/task3_meeting_to_scope/data/transcripts/meeting_3_followup.md'
+
+/usr/lib/python3.12/pathlib.py:1015: FileNotFoundError
+_______ test_meeting_1_merge_creates_two_requirements_and_one_commitment _______
+
+    def test_meeting_1_merge_creates_two_requirements_and_one_commitment():
+>       tr, records = _records_for("meeting_1_website")
+
+tests/test_merge_conflicts.py:19: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_merge_conflicts.py:12: in _records_for
+    tr = load_transcript(T_DIR / f"{transcript_id}.md")
+src/ingestion/loader.py:26: in load_transcript
+    text = path.read_text(encoding="utf-8")
+/usr/lib/python3.12/pathlib.py:1029: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/home/sayen/projects/ai-tech-consultant/task3_meeting_to_scope/data/transcripts/meeting_1_website.md')
+mode = 'r', buffering = -1, encoding = 'utf-8', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+E       FileNotFoundError: [Errno 2] No such file or directory: '/home/sayen/projects/ai-tech-consultant/task3_meeting_to_scope/data/transcripts/meeting_1_website.md'
+
+/usr/lib/python3.12/pathlib.py:1015: FileNotFoundError
+___________________ test_followup_deadline_conflict_detected ___________________
+
+    def test_followup_deadline_conflict_detected():
+>       tr1, r1 = _records_for("meeting_1_website")
+
+tests/test_merge_conflicts.py:28: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_merge_conflicts.py:12: in _records_for
+    tr = load_transcript(T_DIR / f"{transcript_id}.md")
+src/ingestion/loader.py:26: in load_transcript
+    text = path.read_text(encoding="utf-8")
+/usr/lib/python3.12/pathlib.py:1029: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/home/sayen/projects/ai-tech-consultant/task3_meeting_to_scope/data/transcripts/meeting_1_website.md')
+mode = 'r', buffering = -1, encoding = 'utf-8', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+E       FileNotFoundError: [Errno 2] No such file or directory: '/home/sayen/projects/ai-tech-consultant/task3_meeting_to_scope/data/transcripts/meeting_1_website.md'
+
+/usr/lib/python3.12/pathlib.py:1015: FileNotFoundError
+_____________________ test_meeting_2_open_question_carrier _____________________
+
+    def test_meeting_2_open_question_carrier():
+>       tr, records = _records_for("meeting_2_ecommerce")
+
+tests/test_merge_conflicts.py:40: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_merge_conflicts.py:12: in _records_for
+    tr = load_transcript(T_DIR / f"{transcript_id}.md")
+src/ingestion/loader.py:26: in load_transcript
+    text = path.read_text(encoding="utf-8")
+/usr/lib/python3.12/pathlib.py:1029: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/home/sayen/projects/ai-tech-consultant/task3_meeting_to_scope/data/transcripts/meeting_2_ecommerce.md')
+mode = 'r', buffering = -1, encoding = 'utf-8', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+E       FileNotFoundError: [Errno 2] No such file or directory: '/home/sayen/projects/ai-tech-consultant/task3_meeting_to_scope/data/transcripts/meeting_2_ecommerce.md'
+
+/usr/lib/python3.12/pathlib.py:1015: FileNotFoundError
+_____________ test_all_client_stated_requirements_validate_cleanly _____________
+
+    def test_all_client_stated_requirements_validate_cleanly():
+>       tr = load_transcript(T_DIR / "meeting_1_website.md")
+
+tests/test_validate_claims.py:13: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/ingestion/loader.py:26: in load_transcript
+    text = path.read_text(encoding="utf-8")
+/usr/lib/python3.12/pathlib.py:1029: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/home/sayen/projects/ai-tech-consultant/task3_meeting_to_scope/data/transcripts/meeting_1_website.md')
+mode = 'r', buffering = -1, encoding = 'utf-8', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+E       FileNotFoundError: [Errno 2] No such file or directory: '/home/sayen/projects/ai-tech-consultant/task3_meeting_to_scope/data/transcripts/meeting_1_website.md'
+
+/usr/lib/python3.12/pathlib.py:1015: FileNotFoundError
+__________________________ test_bad_quote_is_flagged ___________________________
+
+    def test_bad_quote_is_flagged():
+        from src.schemas import Requirement, TurnRef
+>       tr = load_transcript(T_DIR / "meeting_1_website.md")
+
+tests/test_validate_claims.py:24: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/ingestion/loader.py:26: in load_transcript
+    text = path.read_text(encoding="utf-8")
+/usr/lib/python3.12/pathlib.py:1029: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/home/sayen/projects/ai-tech-consultant/task3_meeting_to_scope/data/transcripts/meeting_1_website.md')
+mode = 'r', buffering = -1, encoding = 'utf-8', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+E       FileNotFoundError: [Errno 2] No such file or directory: '/home/sayen/projects/ai-tech-consultant/task3_meeting_to_scope/data/transcripts/meeting_1_website.md'
+
+/usr/lib/python3.12/pathlib.py:1015: FileNotFoundError
+=============================== warnings summary ===============================
+../tech/lib/python3.12/site-packages/starlette/testclient.py:40
+  /home/sayen/projects/ai-tech-consultant/tech/lib/python3.12/site-packages/starlette/testclient.py:40: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = typing.Callable[[], typing.ContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_api.py::test_ingest_and_view - FileNotFoundError: [Errno 2]...
+FAILED tests/test_extractor_mock.py::test_mock_extractor_returns_expected_records_for_meeting_1
+FAILED tests/test_extractor_mock.py::test_mock_extractor_records_have_source_refs
+FAILED tests/test_loader.py::test_load_meeting_1 - FileNotFoundError: [Errno ...
+FAILED tests/test_loader.py::test_load_meeting_2 - FileNotFoundError: [Errno ...
+FAILED tests/test_loader.py::test_load_meeting_3 - FileNotFoundError: [Errno ...
+FAILED tests/test_merge_conflicts.py::test_meeting_1_merge_creates_two_requirements_and_one_commitment
+FAILED tests/test_merge_conflicts.py::test_followup_deadline_conflict_detected
+FAILED tests/test_merge_conflicts.py::test_meeting_2_open_question_carrier - ...
+FAILED tests/test_validate_claims.py::test_all_client_stated_requirements_validate_cleanly
+FAILED tests/test_validate_claims.py::test_bad_quote_is_flagged - FileNotFoun...
+=================== 11 failed, 7 passed, 1 warning in 1.10s ====================

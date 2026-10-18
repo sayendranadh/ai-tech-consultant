@@ -1,0 +1,24 @@
+
+> task2-inbox-agent@0.1.0 dataset:coverage
+> tsx scripts/dataset_coverage.ts
+
+{
+  "path": "/home/sayen/projects/ai-tech-consultant/task2_inbox_agent/data/emails_v1.jsonl",
+  "total": 50,
+  "by_category": {
+    "how_to": 8,
+    "troubleshooting": 7,
+    "project_request": 7,
+    "refund_cancellation": 7,
+    "complaint": 7,
+    "quote_request": 7,
+    "follow_up": 7
+  },
+  "by_risk": {
+    "low": 12,
+    "medium": 21,
+    "high": 17
+  },
+  "escalation_required": 35,
+  "non_synthetic_flagged": 0
+}

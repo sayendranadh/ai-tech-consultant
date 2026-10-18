@@ -1,0 +1,27 @@
+{
+  "project_website": {
+    "proposal_id": "prop-baseline-001",
+    "version": 1,
+    "status": "approved",
+    "approved_by": "alice.manager@example.com",
+    "requirements": [
+      {
+        "requirement_id": "REQ-BASE-001",
+        "description": "Redesign the homepage to reflect the new brand.",
+        "source_quote": "We must redesign the homepage to reflect the new brand.",
+        "acceptance_criteria": ["New homepage deployed to production", "Matches brand guidelines"],
+        "deadline": "2025-03-15"
+      },
+      {
+        "requirement_id": "REQ-BASE-002",
+        "description": "Add a contact form that routes submissions to the sales team.",
+        "source_quote": "we must add a contact form that routes submissions to our sales team.",
+        "acceptance_criteria": ["Form visible on homepage", "Submissions delivered to sales@example.com"],
+        "deadline": null
+      }
+    ],
+    "estimate_totals": {"low_hours": 30.0, "likely_hours": 52.0, "high_hours": 92.0},
+    "deliverables": ["Redesigned homepage", "Contact form"],
+    "exclusions": ["Blog section (explicitly excluded by client)"]
+  }
+}

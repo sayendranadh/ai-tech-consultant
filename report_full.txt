@@ -1,0 +1,58 @@
+/home/sayen/projects/ai-tech-consultant/tech/lib/python3.12/site-packages/pytest_asyncio/plugin.py:208: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-8.3.3, pluggy-1.7.0 -- /home/sayen/projects/ai-tech-consultant/tech/bin/python3
+cachedir: .pytest_cache
+rootdir: /home/sayen/projects/ai-tech-consultant
+configfile: pytest.ini
+testpaths: tests
+plugins: asyncio-0.24.0, respx-0.21.1, anyio-4.15.1
+asyncio: mode=Mode.AUTO, default_loop_scope=None
+collecting ... collected 35 items
+
+tests/ingestion/test_chunker.py::test_chunks_respect_headings PASSED     [  2%]
+tests/ingestion/test_chunker.py::test_empty_article_no_chunks PASSED     [  5%]
+tests/ingestion/test_fetcher.py::test_retry_transient_then_success PASSED [  8%]
+tests/ingestion/test_fetcher.py::test_retry_exhausted_transient PASSED   [ 11%]
+tests/ingestion/test_fetcher.py::test_permanent_404_not_retried PASSED   [ 14%]
+tests/ingestion/test_fetcher.py::test_robots_absent_allows_all PASSED    [ 17%]
+tests/ingestion/test_fetcher.py::test_robots_disallow PASSED             [ 20%]
+tests/ingestion/test_orchestrator.py::test_idempotent_second_run PASSED  [ 22%]
+tests/ingestion/test_orchestrator.py::test_permanent_failure_isolated PASSED [ 25%]
+tests/ingestion/test_orchestrator.py::test_removed_page_deactivates_chunks PASSED [ 28%]
+tests/ingestion/test_orchestrator.py::test_transient_failure_recorded PASSED [ 31%]
+tests/ingestion/test_parser.py::test_parse_article_fields PASSED         [ 34%]
+tests/ingestion/test_parser.py::test_heading_image_association PASSED    [ 37%]
+tests/ingestion/test_sitemap_parser.py::test_parse_urlset PASSED         [ 40%]
+tests/ingestion/test_sitemap_parser.py::test_parse_index PASSED          [ 42%]
+tests/ingestion/test_sitemap_parser.py::test_malformed_xml_raises PASSED [ 45%]
+tests/ingestion/test_sitemap_parser.py::test_dedupe_preserves_order PASSED [ 48%]
+tests/ingestion/test_sitemap_parser.py::test_domain_allowlist PASSED     [ 51%]
+tests/qa/test_citation_validator.py::test_valid_citations_pass PASSED    [ 54%]
+tests/qa/test_citation_validator.py::test_unretrieved_citation_rejected PASSED [ 57%]
+tests/qa/test_citation_validator.py::test_empty_sources_ok PASSED        [ 60%]
+tests/qa/test_pipeline.py::test_answered_with_valid_citations PASSED     [ 62%]
+tests/qa/test_pipeline.py::test_bad_citation_rejected PASSED             [ 65%]
+tests/qa/test_pipeline.py::test_no_evidence PASSED                       [ 68%]
+tests/qa/test_pipeline.py::test_model_failure_returns_failed PASSED      [ 71%]
+tests/qa/test_pipeline.py::test_mock_client_abstains PASSED              [ 74%]
+tests/retrieval/test_embedder.py::test_mock_embedder_deterministic PASSED [ 77%]
+tests/retrieval/test_embedder.py::test_mock_embedder_unit_length PASSED  [ 80%]
+tests/retrieval/test_embedder.py::test_mock_embedder_empty PASSED        [ 82%]
+tests/retrieval/test_retriever.py::test_semantic_search_returns_active_chunks PASSED [ 85%]
+tests/retrieval/test_retriever.py::test_keyword_search PASSED            [ 88%]
+tests/retrieval/test_retriever.py::test_inactive_chunks_excluded PASSED  [ 91%]
+tests/retrieval/test_vector_store.py::test_fallback_flag_is_bool PASSED  [ 94%]
+tests/retrieval/test_vector_store.py::test_upsert_and_search PASSED      [ 97%]
+tests/retrieval/test_vector_store.py::test_idempotent_upsert PASSED      [100%]
+
+=============================== warnings summary ===============================
+tests/ingestion/test_orchestrator.py: 9 warnings
+tests/ingestion/test_parser.py: 2 warnings
+  /home/sayen/projects/ai-tech-consultant/tech/lib/python3.12/site-packages/bs4/builder/_lxml.py:124: DeprecationWarning: The 'strip_cdata' option of HTMLParser() has never done anything and will eventually be removed.
+    parser = parser(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================= 35 passed, 11 warnings in 20.55s =======================

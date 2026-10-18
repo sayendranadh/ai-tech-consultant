@@ -1,0 +1,19 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-8.3.3, pluggy-1.7.0 -- /home/sayen/projects/ai-tech-consultant/tech/bin/python3
+cachedir: .pytest_cache
+rootdir: /home/sayen/projects/ai-tech-consultant
+configfile: pytest.ini
+plugins: asyncio-0.24.0, respx-0.21.1, anyio-4.15.1
+asyncio: mode=Mode.AUTO, default_loop_scope=function
+collecting ... collected 8 items
+
+tests_integration/test_task1_wiring.py::test_direct_http_query_returns_fixture_answer PASSED [ 12%]
+tests_integration/test_task1_wiring.py::test_request_id_echoed PASSED    [ 25%]
+tests_integration/test_task1_wiring.py::test_request_id_generated_when_absent PASSED [ 37%]
+tests_integration/test_task1_wiring.py::test_task2_kbclient_against_live_task1 PASSED [ 50%]
+tests_integration/test_task1_wiring.py::test_task2_kbclient_insufficient_evidence PASSED [ 62%]
+tests_integration/test_task1_wiring.py::test_task3_httpkbclient_against_live_task1 PASSED [ 75%]
+tests_integration/test_task1_wiring.py::test_task3_feasibility_heuristic_on_live_answer PASSED [ 87%]
+tests_integration/test_task1_wiring.py::test_task3_feasibility_insufficient_evidence_when_no_fixture PASSED [100%]
+
+============================== 8 passed in 4.10s ===============================

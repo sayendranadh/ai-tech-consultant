@@ -1,0 +1,9 @@
+
+> task2-inbox-agent@0.1.0 build
+> tsc --noEmit
+
+src/kb/client.ts(6,12): error TS1029: 'override' modifier must precede 'readonly' modifier.
+tests/idempotency.test.ts(28,21): error TS2554: Expected 4 arguments, but got 3.
+tests/idempotency.test.ts(29,21): error TS2554: Expected 4 arguments, but got 3.
+tests/idempotency.test.ts(36,21): error TS2554: Expected 4 arguments, but got 3.
+tests/idempotency.test.ts(37,21): error TS2554: Expected 4 arguments, but got 3.

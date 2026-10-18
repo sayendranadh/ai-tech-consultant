@@ -1,0 +1,32 @@
+/home/sayen/projects/ai-tech-consultant/tech/lib/python3.12/site-packages/pytest_asyncio/plugin.py:208: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-8.3.3, pluggy-1.7.0 -- /home/sayen/projects/ai-tech-consultant/tech/bin/python3
+cachedir: .pytest_cache
+rootdir: /home/sayen/projects/ai-tech-consultant
+configfile: pytest.ini
+plugins: asyncio-0.24.0, respx-0.21.1, anyio-4.15.1
+asyncio: mode=Mode.AUTO, default_loop_scope=None
+collecting ... collected 17 items
+
+tests/retrieval/test_embedder.py::test_mock_embedder_deterministic PASSED [  5%]
+tests/retrieval/test_embedder.py::test_mock_embedder_unit_length PASSED  [ 11%]
+tests/retrieval/test_embedder.py::test_mock_embedder_empty PASSED        [ 17%]
+tests/retrieval/test_retriever.py::test_semantic_search_returns_active_chunks PASSED [ 23%]
+tests/retrieval/test_retriever.py::test_keyword_search PASSED            [ 29%]
+tests/retrieval/test_retriever.py::test_inactive_chunks_excluded PASSED  [ 35%]
+tests/retrieval/test_vector_store.py::test_fallback_flag_is_bool PASSED  [ 41%]
+tests/retrieval/test_vector_store.py::test_upsert_and_search PASSED      [ 47%]
+tests/retrieval/test_vector_store.py::test_idempotent_upsert PASSED      [ 52%]
+tests/qa/test_citation_validator.py::test_valid_citations_pass PASSED    [ 58%]
+tests/qa/test_citation_validator.py::test_unretrieved_citation_rejected PASSED [ 64%]
+tests/qa/test_citation_validator.py::test_empty_sources_ok PASSED        [ 70%]
+tests/qa/test_pipeline.py::test_answered_with_valid_citations PASSED     [ 76%]
+tests/qa/test_pipeline.py::test_bad_citation_rejected PASSED             [ 82%]
+tests/qa/test_pipeline.py::test_no_evidence PASSED                       [ 88%]
+tests/qa/test_pipeline.py::test_model_failure_returns_failed PASSED      [ 94%]
+tests/qa/test_pipeline.py::test_mock_client_abstains PASSED              [100%]
+
+============================== 17 passed in 4.33s ==============================

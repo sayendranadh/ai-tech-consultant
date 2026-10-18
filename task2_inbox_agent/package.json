@@ -1,0 +1,35 @@
+{
+  "name": "task2-inbox-agent",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc --noEmit",
+    "start": "node --enable-source-maps dist/server.js",
+    "dev": "tsx watch src/server.ts",
+    "generate:kb-types": "openapi-typescript ../docs/api/knowledge_brain.openapi.json -o src/kb/openapi.d.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "dataset:coverage": "tsx scripts/dataset_coverage.ts"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.135.0",
+    "@fastify/cors": "^11.3.1",
+    "@fastify/formbody": "^8.0.2",
+    "better-sqlite3": "^11.5.0",
+    "fastify": "^5.1.0",
+    "openapi-fetch": "^0.13.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.11",
+    "@types/node": "^22.9.0",
+    "openapi-typescript": "^7.4.3",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3",
+    "vitest": "^4.1.12"
+  }
+}

@@ -1,0 +1,50 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-8.3.3, pluggy-1.7.0 -- /home/sayen/projects/ai-tech-consultant/tech/bin/python3
+cachedir: .pytest_cache
+rootdir: /home/sayen/projects/ai-tech-consultant
+configfile: pytest.ini
+plugins: asyncio-0.24.0, respx-0.21.1, anyio-4.15.1
+asyncio: mode=Mode.AUTO, default_loop_scope=function
+collecting ... collected 7 items
+
+tests_integration/test_task1_wiring.py::test_direct_http_query_returns_fixture_answer PASSED [ 14%]
+tests_integration/test_task1_wiring.py::test_request_id_echoed PASSED    [ 28%]
+tests_integration/test_task1_wiring.py::test_request_id_generated_when_absent PASSED [ 42%]
+tests_integration/test_task1_wiring.py::test_task2_kbclient_against_live_task1 PASSED [ 57%]
+tests_integration/test_task1_wiring.py::test_task2_kbclient_insufficient_evidence PASSED [ 71%]
+tests_integration/test_task1_wiring.py::test_task3_httpkbclient_against_live_task1 PASSED [ 85%]
+tests_integration/test_task1_wiring.py::test_task3_feasibility_heuristic_on_live_answer FAILED [100%]
+
+=================================== FAILURES ===================================
+_______________ test_task3_feasibility_heuristic_on_live_answer ________________
+
+task1_process = {'admin_token': 'admin-token', 'base_url': 'http://127.0.0.1:35091', 'log_path': PosixPath('/home/sayen/projects/ai-te...integration_task1.log'), 'proc': <Popen: returncode: None args: ['/home/sayen/projects/ai-tech-consultant/tec...>, ...}
+
+    def test_task3_feasibility_heuristic_on_live_answer(task1_process):
+        """Verification C deeper wiring: FeasibilityAgent classifies live Task 1 answer."""
+        import sys
+        sys.path.insert(0, str(ROOT / "task3_meeting_to_scope"))
+        from src.feasibility_agent import FeasibilityAgent
+        from src.kb_client import HTTPKBClient
+        from src.schemas import Requirement, TurnRef
+        kb = HTTPKBClient(base_url=task1_process["base_url"], bearer_token=task1_process["task3_token"], timeout_ms=5000, max_retries=1)
+        agent = FeasibilityAgent(kb=kb)
+        req = Requirement(
+            requirement_id="REQ-TEST-1", project_id="project_website",
+            description="support custom theming",
+            source_meeting=1,
+            source_refs=[TurnRef(transcript_id="t", turn_id="turn-001", speaker="s", quote="q")],
+            provenance="client_stated",
+        )
+        check = agent.check(req)
+>       assert check.classification == "existing_configuration", check
+E       AssertionError: FeasibilityCheck(requirement_id='REQ-TEST-1', project_id='project_website', classification='needs_clarification', status='escalated', evidence_chunk_ids=[], kb_status='insufficient_evidence', notes='kb_answer_length=52', model_id='feasibility/heuristic-v1', prompt_version='v1', checked_at=datetime.datetime(2026, 10, 18, 15, 18, 21, 620215, tzinfo=datetime.timezone.utc))
+E       assert 'needs_clarification' == 'existing_configuration'
+E         
+E         - existing_configuration
+E         + needs_clarification
+
+tests_integration/test_task1_wiring.py:130: AssertionError
+=========================== short test summary info ============================
+FAILED tests_integration/test_task1_wiring.py::test_task3_feasibility_heuristic_on_live_answer
+========================= 1 failed, 6 passed in 6.69s ==========================

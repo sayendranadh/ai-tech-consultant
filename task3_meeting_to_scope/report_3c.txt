@@ -1,0 +1,76 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-8.3.3, pluggy-1.7.0 -- /home/sayen/projects/ai-tech-consultant/tech/bin/python3
+cachedir: .pytest_cache
+rootdir: /home/sayen/projects/ai-tech-consultant/task3_meeting_to_scope
+configfile: pytest.ini
+testpaths: tests
+plugins: asyncio-0.24.0, respx-0.21.1, anyio-4.15.1
+asyncio: mode=Mode.AUTO, default_loop_scope=function
+collecting ... collected 58 items
+
+tests/test_api.py::test_health PASSED                                    [  1%]
+tests/test_api.py::test_ingest_and_view PASSED                           [  3%]
+tests/test_api.py::test_unknown_project_returns_empty_view PASSED        [  5%]
+tests/test_api_3b.py::test_health_reports_ok PASSED                      [  6%]
+tests/test_api_3b.py::test_unknown_proposal_404 PASSED                   [  8%]
+tests/test_api_3b.py::test_send_unapproved_returns_409 PASSED            [ 10%]
+tests/test_api_3c.py::test_compare_returns_report_and_markdown PASSED    [ 12%]
+tests/test_api_3c.py::test_compare_unknown_project_404 PASSED            [ 13%]
+tests/test_api_3c.py::test_send_before_approve_409 PASSED                [ 15%]
+tests/test_api_3c.py::test_approve_then_send_simulated PASSED            [ 17%]
+tests/test_api_3c.py::test_unknown_report_404_or_409 PASSED              [ 18%]
+tests/test_approval_and_send.py::test_send_before_approve_rejected PASSED [ 20%]
+tests/test_approval_and_send.py::test_approve_then_send_succeeds PASSED  [ 22%]
+tests/test_approval_and_send.py::test_unknown_report_approve_raises PASSED [ 24%]
+tests/test_approval_and_send.py::test_unknown_report_send_raises PASSED  [ 25%]
+tests/test_approval_and_send.py::test_approve_without_revised_proposal_rejected PASSED [ 27%]
+tests/test_baseline_preservation.py::test_baseline_version_not_bumped_by_comparison PASSED [ 29%]
+tests/test_baseline_preservation.py::test_revised_is_n_plus_1_and_status_revised PASSED [ 31%]
+tests/test_baseline_preservation.py::test_totals_delta_keys PASSED       [ 32%]
+tests/test_baseline_preservation.py::test_revised_totals_at_least_baseline PASSED [ 34%]
+tests/test_change_detector.py::test_all_change_kinds_present PASSED      [ 36%]
+tests/test_change_detector.py::test_out_of_scope_mobile_app_flagged PASSED [ 37%]
+tests/test_change_detector.py::test_deadline_change_detected PASSED      [ 39%]
+tests/test_change_detector.py::test_contact_form_destination_change_detected PASSED [ 41%]
+tests/test_change_detector.py::test_newsletter_addition_detected PASSED  [ 43%]
+tests/test_change_detector.py::test_blog_removal_decision_detected PASSED [ 44%]
+tests/test_change_detector.py::test_ambiguous_requirement_marked_unresolved PASSED [ 46%]
+tests/test_chunker.py::test_short_transcript_single_chunk PASSED         [ 48%]
+tests/test_chunker.py::test_long_transcript_splits_with_overlap PASSED   [ 50%]
+tests/test_estimator.py::test_totals_match_fixture_sums PASSED           [ 51%]
+tests/test_estimator.py::test_by_task_and_by_requirement_split PASSED    [ 53%]
+tests/test_estimator.py::test_all_estimates_start_provisional PASSED     [ 55%]
+tests/test_estimator.py::test_deterministic PASSED                       [ 56%]
+tests/test_extractor_mock.py::test_mock_extractor_returns_expected_records_for_meeting_1 PASSED [ 58%]
+tests/test_extractor_mock.py::test_mock_extractor_records_have_source_refs PASSED [ 60%]
+tests/test_feasibility.py::test_existing_configuration PASSED            [ 62%]
+tests/test_feasibility.py::test_insufficient_evidence_becomes_needs_clarification PASSED [ 63%]
+tests/test_feasibility.py::test_kb_unavailable_marks_unverified PASSED   [ 65%]
+tests/test_feasibility.py::test_no_unsupported_classification_in_schema PASSED [ 67%]
+tests/test_loader.py::test_load_meeting_1 PASSED                         [ 68%]
+tests/test_loader.py::test_load_meeting_2 PASSED                         [ 70%]
+tests/test_loader.py::test_load_meeting_3 PASSED                         [ 72%]
+tests/test_matcher.py::test_identical_quote_is_confirmed_match PASSED    [ 74%]
+tests/test_matcher.py::test_no_overlap_is_none_match PASSED              [ 75%]
+tests/test_matcher.py::test_partial_overlap_is_ambiguous_or_confirmed PASSED [ 77%]
+tests/test_matcher.py::test_false_positive_not_confirmed PASSED          [ 79%]
+tests/test_merge_conflicts.py::test_meeting_1_merge_creates_two_requirements_and_one_commitment PASSED [ 81%]
+tests/test_merge_conflicts.py::test_followup_deadline_conflict_detected PASSED [ 82%]
+tests/test_merge_conflicts.py::test_meeting_2_open_question_carrier PASSED [ 84%]
+tests/test_proposal_and_approval.py::test_send_before_approve_rejected PASSED [ 86%]
+tests/test_proposal_and_approval.py::test_approve_then_send PASSED       [ 87%]
+tests/test_proposal_and_approval.py::test_pricing_is_unresolved_by_default PASSED [ 89%]
+tests/test_proposal_and_approval.py::test_proposal_contains_required_sections PASSED [ 91%]
+tests/test_schemas.py::test_requirement_requires_source_ref PASSED       [ 93%]
+tests/test_schemas.py::test_requirement_valid PASSED                     [ 94%]
+tests/test_schemas.py::test_transcript_roundtrip PASSED                  [ 96%]
+tests/test_validate_claims.py::test_all_client_stated_requirements_validate_cleanly PASSED [ 98%]
+tests/test_validate_claims.py::test_bad_quote_is_flagged PASSED          [100%]
+
+=============================== warnings summary ===============================
+../tech/lib/python3.12/site-packages/starlette/testclient.py:40
+  /home/sayen/projects/ai-tech-consultant/tech/lib/python3.12/site-packages/starlette/testclient.py:40: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = typing.Callable[[], typing.ContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================== 58 passed, 1 warning in 5.57s =========================

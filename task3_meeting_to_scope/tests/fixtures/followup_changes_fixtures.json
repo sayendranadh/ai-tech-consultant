@@ -1,0 +1,58 @@
+{
+  "project_id": "project_website",
+  "transcript_id": "meeting_3_followup",
+  "extracted_requirements": [
+    {
+      "requirement_id": "REQ-FU-001",
+      "description": "Redesign the homepage to reflect the new brand.",
+      "source_quote": "The homepage redesign is still required. We must redesign the homepage as before.",
+      "turn_id": "turn-009",
+      "provenance": "client_stated"
+    },
+    {
+      "requirement_id": "REQ-FU-002",
+      "description": "Contact form must route submissions to the support team (previously sales).",
+      "source_quote": "we must route contact form submissions to our support team.",
+      "turn_id": "turn-003",
+      "provenance": "client_stated"
+    },
+    {
+      "requirement_id": "REQ-FU-003",
+      "description": "Add a newsletter signup widget in the footer.",
+      "source_quote": "We must include a newsletter signup widget in this phase.",
+      "turn_id": "turn-005",
+      "provenance": "client_stated"
+    },
+    {
+      "requirement_id": "REQ-FU-004",
+      "description": "Improve site performance and general look-and-feel.",
+      "source_quote": "We'd also like the site to feel more modern overall.",
+      "turn_id": "turn-006",
+      "provenance": "model_inferred",
+      "tentative": true
+    },
+    {
+      "requirement_id": "REQ-FU-005",
+      "description": "Build a mobile app for iOS and Android.",
+      "source_quote": "We'd love a mobile app eventually, but that's out of scope for now.",
+      "turn_id": "turn-010",
+      "provenance": "client_stated"
+    }
+  ],
+  "decisions": [
+    {
+      "description": "Blog section removed entirely, not even in a future phase.",
+      "source_quote": "drop the blog section. We're not doing a blog at all, not even in a future phase.",
+      "turn_id": "turn-011"
+    }
+  ],
+  "commitments": [
+    {
+      "description": "New homepage live by 2025-04-01.",
+      "source_quote": "We need the new homepage live by April 1, 2025 instead of March 15.",
+      "turn_id": "turn-007",
+      "deadline": "2025-04-01",
+      "old_deadline": "2025-03-15"
+    }
+  ]
+}

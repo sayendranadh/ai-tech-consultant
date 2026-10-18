@@ -1,0 +1,214 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>AI Tech Consultant — Dashboard</title>
+<style>
+  body { font-family: system-ui, -apple-system, sans-serif; max-width: 1000px; margin: 2em auto; padding: 0 1em; line-height: 1.5; color: #222; }
+  h1 { border-bottom: 2px solid #0a66c2; padding-bottom: 0.3em; }
+  h2 { margin-top: 2em; color: #0a66c2; border-bottom: 1px solid #ddd; padding-bottom: 0.3em; }
+  label { display: block; margin-top: 0.8em; font-weight: 600; }
+  input, textarea, button { font-family: inherit; font-size: 1rem; padding: 0.5em; width: 100%; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+  button { background: #0a66c2; color: #fff; border: none; padding: 0.7em; margin-top: 0.8em; cursor: pointer; }
+  button:disabled { background: #999; cursor: not-allowed; }
+  .answer-box { border-left: 4px solid #0a66c2; padding: 1em; margin-top: 1em; background: #f7f9fc; white-space: pre-wrap; }
+  .error-box { border-left: 4px solid #c00; background: #fee; padding: 1em; margin-top: 1em; }
+  .insufficient { border-left-color: #d97706; background: #fff8e1; }
+  .sources-box { margin-top: 0.8em; }
+  .sources-box ul { padding-left: 1.2em; }
+  .status-line { margin-top: 0.5em; font-size: 0.85rem; color: #666; }
+  .draft-item { border: 1px solid #ddd; padding: 0.6em; margin: 0.4em 0; border-radius: 4px; }
+  .draft-item a { color: #0a66c2; text-decoration: none; }
+  .draft-item a:hover { text-decoration: underline; }
+  .req-item { border-left: 3px solid #0a66c2; padding: 0.5em; margin: 0.4em 0; background: #f7f9fc; }
+  .conflict-item { border-left: 3px solid #c00; padding: 0.5em; margin: 0.4em 0; background: #fee; }
+  .pill { display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 0.85em; background: #eee; margin-right: 4px; }
+</style>
+</head>
+<body>
+
+<h1>AI Tech Consultant — Dashboard</h1>
+<p><em>Reads from the three services over their HTTP APIs. This page is a thin client; it does not proxy or cache anything. Each service's CORS policy is set to allow any origin (demo configuration).</em></p>
+
+<!-- ============ TASK 1 ============ -->
+<h2>Task 1 — Knowledge Brain (query)</h2>
+<p><em>Endpoint: <code>http://127.0.0.1:8000</code></em></p>
+
+<label for="t1-token">Bearer token (KB_API_TOKEN_TASK2):</label>
+<input id="t1-token" type="password" autocomplete="off" placeholder="paste token" />
+
+<label for="t1-question">Question:</label>
+<textarea id="t1-question" rows="3" placeholder="e.g. How do I import members via CSV?"></textarea>
+
+<button id="t1-ask">Ask</button>
+<div id="t1-status" class="status-line"></div>
+<div id="t1-answer"></div>
+
+<!-- ============ TASK 2 ============ -->
+<h2>Task 2 — Inbox Agent (pending drafts)</h2>
+<p><em>Endpoint: <code>http://127.0.0.1:8100</code> — <a href="http://127.0.0.1:8100/review" target="_blank" rel="noopener">open full review UI</a></em></p>
+<button id="t2-refresh">Refresh pending drafts</button>
+<div id="t2-status" class="status-line"></div>
+<div id="t2-list"></div>
+
+<!-- ============ TASK 3 ============ -->
+<h2>Task 3 — Meeting-to-Scope (project view)</h2>
+<p><em>Endpoint: <code>http://127.0.0.1:8200</code></em></p>
+
+<label for="t3-token">Bearer token (T3_API_TOKEN):</label>
+<input id="t3-token" type="password" autocomplete="off" placeholder="paste token" />
+
+<label for="t3-project">Project ID:</label>
+<input id="t3-project" type="text" placeholder="e.g. project_website" />
+
+<button id="t3-load">Load project</button>
+<div id="t3-status" class="status-line"></div>
+<div id="t3-content"></div>
+
+<script>
+(function () {
+  // ---- helpers ----
+  function escapeHtml(s) {
+    return String(s == null ? "" : s)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  }
+  function setStatus(el, msg) { el.textContent = msg || ""; }
+
+  // ---- Task 1 ----
+  var t1Ask = document.getElementById("t1-ask");
+  t1Ask.addEventListener("click", function () {
+    var token = document.getElementById("t1-token").value.trim();
+    var question = document.getElementById("t1-question").value.trim();
+    var statusEl = document.getElementById("t1-status");
+    var answerEl = document.getElementById("t1-answer");
+    answerEl.innerHTML = "";
+    if (!token) return setStatus(statusEl, "token required");
+    if (!question) return setStatus(statusEl, "question required");
+    t1Ask.disabled = true;
+    setStatus(statusEl, "calling Task 1…");
+    var start = performance.now();
+    fetch("http://127.0.0.1:8000/query", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
+      body: JSON.stringify({ question: question })
+    }).then(function (resp) {
+      return resp.json().then(function (body) { return { status: resp.status, body: body }; });
+    }).then(function (r) {
+      var ms = Math.round(performance.now() - start);
+      if (r.status !== 200) {
+        answerEl.innerHTML = "<div class='error-box'><strong>Error " + r.status + ":</strong> " + escapeHtml(JSON.stringify(r.body)) + "</div>";
+        setStatus(statusEl, "failed after " + ms + "ms");
+        return;
+      }
+      var cls = "answer-box";
+      if (r.body.status === "insufficient_evidence") cls += " insufficient";
+      if (r.body.status === "failed") cls = "error-box";
+      var html = "<div class='" + cls + "'>" + escapeHtml(r.body.answer || "(no answer)") + "</div>";
+      if (r.body.sources && r.body.sources.length) {
+        html += "<div class='sources-box'><strong>Sources:</strong><ul>";
+        for (var i = 0; i < r.body.sources.length; i++) {
+          var s = r.body.sources[i];
+          html += "<li>chunk_id=" + escapeHtml(String(s.chunk_id)) + " — <a href='" + escapeHtml(s.url) + "' target='_blank' rel='noopener'>" + escapeHtml(s.url) + "</a>"
+                + (s.section ? " (" + escapeHtml(s.section) + ")" : "") + "</li>";
+        }
+        html += "</ul></div>";
+      }
+      html += "<div class='status-line'>status: " + escapeHtml(r.body.status) + " | " + ms + " ms"
+            + (r.body.escalation_required ? " | escalation_required" : "") + "</div>";
+      answerEl.innerHTML = html;
+      setStatus(statusEl, "done");
+    }).catch(function (err) {
+      answerEl.innerHTML = "<div class='error-box'><strong>Network:</strong> " + escapeHtml(String(err)) + "</div>";
+      setStatus(statusEl, "network error");
+    }).finally(function () { t1Ask.disabled = false; });
+  });
+
+  // ---- Task 2 ----
+  var t2Refresh = document.getElementById("t2-refresh");
+  t2Refresh.addEventListener("click", function () {
+    var statusEl = document.getElementById("t2-status");
+    var listEl = document.getElementById("t2-list");
+    listEl.innerHTML = "";
+    t2Refresh.disabled = true;
+    setStatus(statusEl, "fetching…");
+    fetch("http://127.0.0.1:8100/review", { method: "GET" })
+      .then(function (resp) {
+        if (!resp.ok) throw new Error("HTTP " + resp.status);
+        return resp.text();
+      })
+      .then(function (html) {
+        // Task 2's /review returns its own HTML page. Extract the <li> items.
+        var matches = html.match(/<li>[\s\S]*?<\/li>/g) || [];
+        if (!matches.length) {
+          listEl.innerHTML = "<p><em>No pending drafts.</em></p>";
+        } else {
+          var out = "<ul>";
+          for (var i = 0; i < matches.length; i++) {
+            // Rewrite href to absolute URL
+            var item = matches[i].replace(/href="\/review\//g, 'href="http://127.0.0.1:8100/review/');
+            out += "<li class='draft-item'>" + item.replace(/^<li>|<\/li>$/g, "") + "</li>";
+          }
+          out += "</ul>";
+          listEl.innerHTML = out;
+        }
+        setStatus(statusEl, "loaded " + matches.length + " drafts");
+      })
+      .catch(function (err) {
+        listEl.innerHTML = "<div class='error-box'><strong>Error:</strong> " + escapeHtml(String(err)) + " — is Task 2 running on :8100?</div>";
+        setStatus(statusEl, "error");
+      })
+      .finally(function () { t2Refresh.disabled = false; });
+  });
+
+  // ---- Task 3 ----
+  var t3Load = document.getElementById("t3-load");
+  t3Load.addEventListener("click", function () {
+    var token = document.getElementById("t3-token").value.trim();
+    var projectId = document.getElementById("t3-project").value.trim();
+    var statusEl = document.getElementById("t3-status");
+    var contentEl = document.getElementById("t3-content");
+    contentEl.innerHTML = "";
+    if (!projectId) return setStatus(statusEl, "project_id required");
+    t3Load.disabled = true;
+    setStatus(statusEl, "fetching…");
+    var headers = {};
+    if (token) headers["Authorization"] = "Bearer " + token;
+    fetch("http://127.0.0.1:8200/projects/" + encodeURIComponent(projectId), { headers: headers })
+      .then(function (resp) {
+        return resp.json().then(function (body) { return { status: resp.status, body: body }; });
+      })
+      .then(function (r) {
+        if (r.status !== 200) {
+          contentEl.innerHTML = "<div class='error-box'><strong>Error " + r.status + ":</strong> " + escapeHtml(JSON.stringify(r.body)) + "</div>";
+          setStatus(statusEl, "failed");
+          return;
+        }
+        var p = r.body.project || r.body;
+        var html = "";
+        html += "<p><span class='pill'>requirements: " + ((p.requirements || []).length) + "</span>";
+        html += "<span class='pill'>open_questions: " + ((p.open_questions || []).length) + "</span>";
+        html += "<span class='pill'>conflicts: " + ((p.conflicts || []).length) + "</span></p>";
+        (p.requirements || []).forEach(function (req) {
+          html += "<div class='req-item'><strong>" + escapeHtml(req.requirement_id) + "</strong> — " + escapeHtml(req.description) + "</div>";
+        });
+        (p.open_questions || []).forEach(function (oq) {
+          html += "<div class='req-item'><em>Q:</em> " + escapeHtml(oq.text) + "</div>";
+        });
+        (p.conflicts || []).forEach(function (cf) {
+          html += "<div class='conflict-item'><strong>Conflict:</strong> " + escapeHtml(cf.text) + "</div>";
+        });
+        if (!html) html = "<p><em>Empty project.</em></p>";
+        contentEl.innerHTML = html;
+        setStatus(statusEl, "loaded");
+      })
+      .catch(function (err) {
+        contentEl.innerHTML = "<div class='error-box'><strong>Network:</strong> " + escapeHtml(String(err)) + " — is Task 3 running on :8200?</div>";
+        setStatus(statusEl, "error");
+      })
+      .finally(function () { t3Load.disabled = false; });
+  });
+})();
+</script>
+</body>
+</html>

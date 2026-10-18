@@ -1,0 +1,5 @@
+{"case_id":"t3h-extract-001","task":"task3","category":"requirement_extraction","input":{"transcript_id":"eval3h-meeting-001"},"pass_criteria":{"min_requirements_extracted":2},"notes":"Holdout — never used for prompt tuning"}
+{"case_id":"t3h-trace-001","task":"task3","category":"source_traceability","input":{"transcript_id":"eval3h-meeting-002"},"pass_criteria":{"all_requirements_have_source_refs":true},"notes":"Holdout"}
+{"case_id":"t3h-feasibility-001","task":"task3","category":"feasibility","input":{"transcript_id":"eval3h-meeting-003"},"pass_criteria":{"min_feasibility_checks":1,"all_checks_have_classification":true},"notes":"Holdout"}
+{"case_id":"t3h-estimate-001","task":"task3","category":"estimation","input":{"transcript_id":"eval3h-meeting-004"},"pass_criteria":{"estimate_low_positive":true,"estimate_high_ge_low":true},"notes":"Holdout"}
+{"case_id":"t3h-scope-001","task":"task3","category":"scope_change","input":{"transcript_id":"eval3h-followup-001"},"pass_criteria":{"change_detected":true,"baseline_preserved":true},"notes":"Holdout"}

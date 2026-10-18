@@ -1,0 +1,18 @@
+{
+  "project_website": {
+    "executive_summary_template": "This proposal covers the {project_id} engagement with {requirement_count} agreed requirements.",
+    "next_steps_template": "Schedule kickoff and confirm outstanding open questions before commencement.",
+    "risks": [
+      "Delivery date assumes brand assets delivered before kickoff.",
+      "Newsletter provider selection is outstanding and affects integration effort."
+    ],
+    "exclusions": [
+      "Blog section (explicitly excluded by client)",
+      "Ongoing hosting and maintenance"
+    ],
+    "client_responsibilities": [
+      "Deliver brand assets before kickoff",
+      "Confirm newsletter provider"
+    ]
+  }
+}

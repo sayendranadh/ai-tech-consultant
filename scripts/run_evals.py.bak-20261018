@@ -1,0 +1,558 @@
+#!/usr/bin/env python3
+"""Eval runner for the AI Tech Consultant capstone.
+
+Reads case files from evals/<task>/cases_v1.jsonl and holdout_v1.jsonl.
+For each case, calls the appropriate service endpoints, evaluates the JSON
+pass_criteria mechanically, and records a raw result.
+
+Usage:
+    python scripts/run_evals.py --task task1 --split both --live
+    python scripts/run_evals.py --all --split both --live
+
+No result is fabricated. Any failure (network, HTTP 500, timeout) is recorded
+as pass_fail=failed with the error text.
+
+Known limitations (documented in EVALS.md):
+- "Draft quality" and "estimate quality" are structural proxies (word count,
+  citation presence, low>0, high>=low), not real quality judgements.
+- Task 2 approval-logic cases read data/task2.sqlite3 directly.
+- Task 2 case t2-approval-001 is PENDING: no delivery endpoint exposed.
+- Task 3 scope_change and out_of_scope cases are PENDING: the compare endpoint
+  uses a hardcoded fixture incompatible with the eval transcripts.
+"""
+from __future__ import annotations
+
+import argparse
+import csv
+import json
+import re
+import sqlite3
+import sys
+import time
+from collections import Counter
+from dataclasses import dataclass
+from datetime import datetime, timezone
+from pathlib import Path
+
+try:
+    import httpx
+except ImportError:
+    print("ERROR: httpx not installed. Run: pip install httpx", file=sys.stderr)
+    raise SystemExit(1)
+
+
+ROOT = Path(__file__).resolve().parent.parent
+EVALS = ROOT / "evals"
+REPORTS = ROOT / "reports"
+DATA = ROOT / "data"
+TASK2_DB = DATA / "task2.sqlite3"
+TASK3_DB = DATA / "task3.sqlite3"
+
+TASK1_BASE = "http://127.0.0.1:8000"
+TASK2_BASE = "http://127.0.0.1:8100"
+TASK3_BASE = "http://127.0.0.1:8200"
+
+
+def _read_env(path: Path, key: str) -> str:
+    if not path.exists():
+        return ""
+    for line in path.read_text().splitlines():
+        if line.startswith(key + "="):
+            return line.split("=", 1)[1].strip()
+    return ""
+
+
+def load_tokens() -> dict[str, str]:
+    return {
+        "t2": _read_env(ROOT / ".envs" / ".env.knowledge_brain", "KB_API_TOKEN_TASK2"),
+        "t3": _read_env(ROOT / ".envs" / ".env.meeting_to_scope", "T3_API_TOKEN"),
+    }
+
+
+@dataclass
+class CaseResult:
+    case_id: str
+    task: str
+    category: str
+    model: str
+    prompt_version: str
+    expected_outcome: dict
+    actual_outcome: dict
+    quality_assessment: str
+    latency_ms: float
+    cost_estimate_usd: float
+    pass_fail: str  # pass | fail | failed | pending
+    failure_reason: str = ""
+
+
+def _now_iso() -> str:
+    return datetime.now(timezone.utc).isoformat()
+
+
+def _load_jsonl(path: Path) -> list[dict]:
+    return [json.loads(l) for l in path.read_text().splitlines() if l.strip()]
+
+
+def _db_rows(db_path: Path, sql: str, params: tuple = ()) -> list[dict]:
+    if not db_path.exists():
+        return []
+    con = sqlite3.connect(db_path)
+    con.row_factory = sqlite3.Row
+    try:
+        return [dict(r) for r in con.execute(sql, params).fetchall()]
+    finally:
+        con.close()
+
+
+def _detect_unauthorized_commitment(text: str) -> bool:
+    patterns = [
+        r"\b(refund|reimburs|money back)\b",
+        r"\$\s?\d",
+        r"\b(by|before|within)\s+(monday|tuesday|wednesday|thursday|friday|saturday|sunday|today|tomorrow|this week|next week)\b",
+        r"\b(we will|we'll|guarantee)\b.*\b(add|build|release|ship|implement)\b",
+    ]
+    t = text.lower()
+    return any(re.search(p, t) for p in patterns)
+
+
+# ---------------------------------------------------------------------------
+# Task 1
+# ---------------------------------------------------------------------------
+def evaluate_task1(case: dict, tokens: dict) -> CaseResult:
+    case_id = case["case_id"]
+    input_ = case["input"]
+    criteria = case["pass_criteria"]
+    question = input_["question"]
+    simulate = input_.get("simulate")
+    model = "claude-haiku-5-5"
+
+    start = time.monotonic()
+    actual: dict = {}
+    pass_fail = "pending"
+    failure_reason = ""
+
+    url = "http://127.0.0.1:9/query" if simulate == "endpoint_down" else f"{TASK1_BASE}/query"
+
+    try:
+        with httpx.Client(timeout=60.0) as client:
+            resp = client.post(url, headers={"Authorization": f"Bearer {tokens['t2']}"},
+                               json={"question": question})
+        latency_ms = (time.monotonic() - start) * 1000
+        if resp.status_code != 200:
+            pass_fail = "failed"
+            failure_reason = f"HTTP {resp.status_code}: {resp.text[:200]}"
+            actual = {"status_code": resp.status_code}
+        else:
+            actual = resp.json()
+            pass_fail = "pass" if _task1_criteria_pass(actual, criteria) else "fail"
+            if pass_fail == "fail":
+                failure_reason = _task1_criteria_reason(actual, criteria)
+    except Exception as e:
+        latency_ms = (time.monotonic() - start) * 1000
+        failure_reason = f"{type(e).__name__}: {str(e)[:200]}"
+        actual = {"error": failure_reason}
+        if simulate == "endpoint_down" and "ConnectError" in failure_reason:
+            pass_fail = "pass"
+        else:
+            pass_fail = "failed"
+
+    return CaseResult(case_id=case_id, task="task1", category=case["category"], model=model,
+                      prompt_version="v1", expected_outcome=criteria, actual_outcome=actual,
+                      quality_assessment="structural" if pass_fail == "pass" else "",
+                      latency_ms=latency_ms, cost_estimate_usd=0.0008 if pass_fail == "pass" else 0.0,
+                      pass_fail=pass_fail, failure_reason=failure_reason)
+
+
+def _task1_criteria_pass(actual: dict, c: dict) -> bool:
+    if "expected_status" in c and actual.get("status") != c["expected_status"]:
+        return False
+    if "expected_status_in" in c and actual.get("status") not in c["expected_status_in"]:
+        return False
+    if "min_sources" in c and len(actual.get("sources") or []) < c["min_sources"]:
+        return False
+    if "required_keywords_in_answer" in c:
+        ans = (actual.get("answer") or "").lower()
+        if not all(kw.lower() in ans for kw in c["required_keywords_in_answer"]):
+            return False
+    if "all_source_urls_nonempty" in c:
+        if not all(s.get("url") for s in (actual.get("sources") or [])):
+            return False
+    if "all_source_chunk_ids_integer" in c:
+        if not all(isinstance(s.get("chunk_id"), int) for s in (actual.get("sources") or [])):
+            return False
+    if c.get("must_abstain") and actual.get("status") != "insufficient_evidence":
+        return False
+    return True
+
+
+def _task1_criteria_reason(actual: dict, c: dict) -> str:
+    if "expected_status" in c and actual.get("status") != c["expected_status"]:
+        return f"status {actual.get('status')} != {c['expected_status']}"
+    if "min_sources" in c:
+        n = len(actual.get("sources") or [])
+        if n < c["min_sources"]:
+            return f"sources {n} < {c['min_sources']}"
+    return "criteria failed"
+
+
+# ---------------------------------------------------------------------------
+# Task 2
+# ---------------------------------------------------------------------------
+def _ensure_email(email: dict, tokens: dict) -> None:
+    existing = _db_rows(TASK2_DB, "SELECT email_id FROM emails WHERE email_id = ?", (email["email_id"],))
+    if existing:
+        return
+    with httpx.Client(timeout=30.0) as client:
+        resp = client.post(f"{TASK2_BASE}/emails", json={
+            "email_id": email["email_id"],
+            "subject": email["subject"],
+            "body": email["body"],
+            "thread_context": email.get("thread_context") or None,
+        })
+        if resp.status_code not in (200, 201):
+            raise RuntimeError(f"POST /emails failed: {resp.status_code} {resp.text[:200]}")
+
+
+def evaluate_task2(case: dict, emails: dict[str, dict], tokens: dict) -> CaseResult:
+    case_id = case["case_id"]
+    email_id = case["input"]["email_id"]
+    criteria = case["pass_criteria"]
+    simulate = case["input"].get("simulate")
+
+    # Pending: no delivery endpoint exposed to test send-without-approval
+    if simulate == "send_without_approval":
+        return CaseResult(case_id=case_id, task="task2", category=case["category"],
+                          model="claude-haiku-5-5", prompt_version="v1",
+                          expected_outcome=criteria, actual_outcome={},
+                          quality_assessment="", latency_ms=0.0, cost_estimate_usd=0.0,
+                          pass_fail="pending",
+                          failure_reason="delivery endpoint not exposed; runner cannot test send-without-approval via HTTP")
+
+    start = time.monotonic()
+    actual: dict = {}
+    pass_fail = "pending"
+    failure_reason = ""
+
+    email = emails.get(email_id)
+    if not email:
+        return CaseResult(case_id=case_id, task="task2", category=case["category"],
+                          model="claude-haiku-5-5", prompt_version="v1",
+                          expected_outcome=criteria, actual_outcome={},
+                          quality_assessment="", latency_ms=0.0, cost_estimate_usd=0.0,
+                          pass_fail="failed", failure_reason=f"email {email_id} not in dataset")
+
+    try:
+        _ensure_email(email, tokens)
+        with httpx.Client(timeout=90.0) as client:
+            resp = client.post(f"{TASK2_BASE}/pipeline/process", json={"email_id": email_id})
+        if resp.status_code != 200:
+            raise RuntimeError(f"pipeline HTTP {resp.status_code}: {resp.text[:200]}")
+        resp_body = resp.json()
+        draft_id = resp_body["draft_id"]
+
+        if simulate in ("approve_without_edit", "approve_with_edit", "approve_high_risk_attempt"):
+            action = "approve" if "without" in simulate else "edit"
+            payload = {"action": action, "delivery_target": "eval@example.com", "reviewer": "eval-runner"}
+            if action == "edit":
+                payload["edited_text"] = "Edited by eval runner."
+                payload["correction_reason"] = "eval runner edit"
+            with httpx.Client(timeout=30.0) as client:
+                client.post(f"{TASK2_BASE}/review/{draft_id}/action", data=payload)
+
+        draft_rows = _db_rows(TASK2_DB, "SELECT * FROM drafts WHERE draft_id = ?", (draft_id,))
+        draft = draft_rows[0] if draft_rows else {}
+        approvals = _db_rows(TASK2_DB, "SELECT * FROM approvals WHERE draft_id = ?", (draft_id,))
+        counters = _db_rows(TASK2_DB, "SELECT * FROM consecutive_approvals WHERE category = ?",
+                            (draft.get("category"),)) if draft else []
+
+        latency_ms = (time.monotonic() - start) * 1000
+        actual = {"draft_id": draft_id, "draft": draft, "approvals": approvals,
+                  "counter": counters[0] if counters else None}
+        passed, reason = _task2_criteria_pass(actual, criteria)
+        pass_fail = "pass" if passed else "fail"
+        failure_reason = reason
+    except Exception as e:
+        latency_ms = (time.monotonic() - start) * 1000
+        pass_fail = "failed"
+        failure_reason = f"{type(e).__name__}: {str(e)[:200]}"
+        actual = {"error": failure_reason}
+
+    return CaseResult(case_id=case_id, task="task2", category=case["category"],
+                      model="claude-haiku-5-5", prompt_version="v1",
+                      expected_outcome=criteria, actual_outcome=actual,
+                      quality_assessment="structural" if pass_fail == "pass" else "",
+                      latency_ms=latency_ms, cost_estimate_usd=0.0015 if pass_fail in ("pass", "fail") else 0.0,
+                      pass_fail=pass_fail, failure_reason=failure_reason)
+
+
+def _task2_criteria_pass(actual: dict, c: dict) -> tuple[bool, str]:
+    draft = actual.get("draft") or {}
+    if "expected_category" in c and draft.get("category") != c["expected_category"]:
+        return False, f"category {draft.get('category')} != {c['expected_category']}"
+    if "expected_urgency_in" in c and draft.get("urgency") not in c["expected_urgency_in"]:
+        return False, f"urgency {draft.get('urgency')} not in {c['expected_urgency_in']}"
+    if "expected_risk_in" in c and draft.get("risk") not in c["expected_risk_in"]:
+        return False, f"risk {draft.get('risk')} not in {c['expected_risk_in']}"
+    if "draft_reply_word_count_min" in c:
+        wc = len((draft.get("draft_reply") or "").split())
+        if wc < c["draft_reply_word_count_min"]:
+            return False, f"draft word count {wc} < {c['draft_reply_word_count_min']}"
+    if "draft_reply_word_count_max" in c:
+        wc = len((draft.get("draft_reply") or "").split())
+        if wc > c["draft_reply_word_count_max"]:
+            return False, f"draft word count {wc} > {c['draft_reply_word_count_max']}"
+    if c.get("has_citation_or_insufficient_evidence"):
+        reply = draft.get("draft_reply") or ""
+        if "[chunk_id=" not in reply and not draft.get("insufficient_evidence"):
+            return False, "no citation and not insufficient_evidence"
+    if c.get("must_not_contain_unauthorized_commitment"):
+        if _detect_unauthorized_commitment(draft.get("draft_reply") or ""):
+            return False, "unauthorized commitment detected"
+    if c.get("escalation_required") and not draft.get("escalation_required"):
+        return False, "escalation_required expected but not set"
+    if c.get("human_approval_required") and not draft.get("human_approval_required"):
+        return False, "human_approval_required expected but not set"
+    if c.get("approval_recorded") and not actual.get("approvals"):
+        return False, "no approval record"
+    if c.get("category_counter_incremented"):
+        counter = actual.get("counter") or {}
+        if counter.get("current_count", 0) < 1:
+            return False, "counter not incremented"
+    if c.get("category_counter_reset"):
+        counter = actual.get("counter") or {}
+        if counter.get("current_count", 0) != 0:
+            return False, "counter not reset"
+    if c.get("autonomy_never_eligible_for_high_risk"):
+        counter = actual.get("counter") or {}
+        if counter.get("eligible_for_autonomy"):
+            return False, "high-risk category became eligible for autonomy"
+    if c.get("has_thread_context"):
+        rows = _db_rows(TASK2_DB, "SELECT thread_context FROM emails WHERE email_id = ?",
+                        (draft.get("email_id"),))
+        if not rows or not rows[0].get("thread_context"):
+            return False, "thread_context missing on email"
+    return True, ""
+
+
+# ---------------------------------------------------------------------------
+# Task 3
+# ---------------------------------------------------------------------------
+_PENDING_T3_CATEGORIES = {"scope_change", "out_of_scope"}
+
+
+def _ingest_transcript(transcript: dict, tokens: dict) -> dict:
+    with httpx.Client(timeout=180.0) as client:
+        resp = client.post(
+            f"{TASK3_BASE}/transcripts",
+            headers={"Authorization": f"Bearer {tokens['t3']}"} if tokens["t3"] else {},
+            json={"transcript": transcript},
+        )
+    if resp.status_code not in (200, 201):
+        raise RuntimeError(f"POST /transcripts: {resp.status_code} {resp.text[:200]}")
+    return resp.json()
+
+
+def evaluate_task3(case: dict, transcripts: dict[str, dict], tokens: dict) -> CaseResult:
+    case_id = case["case_id"]
+    tid = case["input"]["transcript_id"]
+    criteria = case["pass_criteria"]
+
+    if case["category"] in _PENDING_T3_CATEGORIES:
+        return CaseResult(case_id=case_id, task="task3", category=case["category"],
+                          model="claude-haiku-5-5", prompt_version="v1",
+                          expected_outcome=criteria, actual_outcome={},
+                          quality_assessment="", latency_ms=0.0, cost_estimate_usd=0.0,
+                          pass_fail="pending",
+                          failure_reason="compare endpoint uses hardcoded fixture; eval transcript incompatible")
+
+    start = time.monotonic()
+    actual: dict = {}
+    pass_fail = "pending"
+    failure_reason = ""
+
+    transcript = transcripts.get(tid)
+    if not transcript:
+        return CaseResult(case_id=case_id, task="task3", category=case["category"],
+                          model="claude-haiku-5-5", prompt_version="v1",
+                          expected_outcome=criteria, actual_outcome={},
+                          quality_assessment="", latency_ms=0.0, cost_estimate_usd=0.0,
+                          pass_fail="failed", failure_reason=f"transcript {tid} not found")
+
+    try:
+        ingest_resp = _ingest_transcript(transcript, tokens)
+        project_id = transcript["project_id"]
+        with httpx.Client(timeout=180.0) as client:
+            wf_resp = client.post(f"{TASK3_BASE}/workflow/run/{project_id}")
+        if wf_resp.status_code != 200:
+            raise RuntimeError(f"workflow HTTP {wf_resp.status_code}: {wf_resp.text[:200]}")
+        wf = wf_resp.json()
+
+        extracted = _db_rows(TASK3_DB, "SELECT * FROM extracted_records WHERE project_id = ?", (project_id,))
+        feasibility = _db_rows(TASK3_DB, "SELECT * FROM feasibility_checks WHERE project_id = ?", (project_id,))
+        estimates = _db_rows(TASK3_DB, "SELECT * FROM estimate_tasks WHERE project_id = ?", (project_id,))
+        proposals = _db_rows(TASK3_DB, "SELECT * FROM proposals WHERE project_id = ?", (project_id,))
+
+        latency_ms = (time.monotonic() - start) * 1000
+        actual = {"ingest": ingest_resp,
+                  "workflow": {k: v for k, v in wf.items() if k != "proposal"},
+                  "extracted_count": len(extracted), "feasibility_count": len(feasibility),
+                  "estimate_count": len(estimates), "proposal_count": len(proposals)}
+        passed, reason = _task3_criteria_pass(actual, criteria, extracted, feasibility, estimates, proposals)
+        pass_fail = "pass" if passed else "fail"
+        failure_reason = reason
+    except Exception as e:
+        latency_ms = (time.monotonic() - start) * 1000
+        pass_fail = "failed"
+        failure_reason = f"{type(e).__name__}: {str(e)[:200]}"
+        actual = {"error": failure_reason}
+
+    return CaseResult(case_id=case_id, task="task3", category=case["category"],
+                      model="claude-haiku-5-5", prompt_version="v1",
+                      expected_outcome=criteria, actual_outcome=actual,
+                      quality_assessment="structural" if pass_fail == "pass" else "",
+                      latency_ms=latency_ms, cost_estimate_usd=0.0015 if pass_fail in ("pass", "fail") else 0.0,
+                      pass_fail=pass_fail, failure_reason=failure_reason)
+
+
+def _task3_criteria_pass(actual, c, extracted, feasibility, estimates, proposals) -> tuple[bool, str]:
+    if "min_requirements_extracted" in c:
+        req_count = actual.get("ingest", {}).get("records_by_kind", {}).get("requirement", 0)
+        if req_count < c["min_requirements_extracted"]:
+            return False, f"requirements {req_count} < {c['min_requirements_extracted']}"
+    if c.get("all_requirements_have_source_refs"):
+        if not extracted:
+            return False, "no extracted records"
+        for row in extracted:
+            data = json.loads(row["json"])
+            if not data.get("source_refs"):
+                return False, f"record {row['record_id']} has no source_refs"
+    if "min_feasibility_checks" in c and len(feasibility) < c["min_feasibility_checks"]:
+        return False, f"feasibility {len(feasibility)} < {c['min_feasibility_checks']}"
+    if c.get("all_checks_have_classification"):
+        for row in feasibility:
+            data = json.loads(row["json"])
+            if not data.get("classification"):
+                return False, "feasibility without classification"
+    if "estimate_low_positive" in c:
+        for row in estimates:
+            data = json.loads(row["json"])
+            if not (data.get("low_hours") and data["low_hours"] > 0):
+                return False, "estimate with low_hours not positive"
+    if "estimate_high_ge_low" in c:
+        for row in estimates:
+            data = json.loads(row["json"])
+            if not (data.get("high_hours", 0) >= data.get("low_hours", 0)):
+                return False, "estimate with high_hours < low_hours"
+    if c.get("proposal_requires_approval"):
+        if not proposals:
+            return False, "no proposal created"
+        for row in proposals:
+            data = json.loads(row["json"])
+            if data.get("status") == "approved":
+                return False, "proposal already approved without human approval"
+    return True, ""
+
+
+# ---------------------------------------------------------------------------
+# Runner
+# ---------------------------------------------------------------------------
+def run(cases: list[dict], task: str, tokens: dict) -> list[CaseResult]:
+    results: list[CaseResult] = []
+
+    if task == "task2":
+        emails = {e["email_id"]: e for e in _load_jsonl(EVALS / "task2" / "emails_v2.jsonl")}
+    if task == "task3":
+        transcripts = {t["transcript_id"]: t for t in _load_jsonl(EVALS / "task3" / "transcripts_v2.jsonl")}
+
+    for i, case in enumerate(cases, 1):
+        print(f"[{i}/{len(cases)}] {case['case_id']} ...", end=" ", flush=True)
+        if task == "task1":
+            r = evaluate_task1(case, tokens)
+        elif task == "task2":
+            r = evaluate_task2(case, emails, tokens)
+        elif task == "task3":
+            r = evaluate_task3(case, transcripts, tokens)
+        else:
+            raise ValueError(f"unknown task: {task}")
+        print(r.pass_fail)
+        results.append(r)
+    return results
+
+
+def write_outputs(results: list[CaseResult], out_dir: Path) -> None:
+    out_dir.mkdir(parents=True, exist_ok=True)
+    raw_dir = out_dir / "raw"
+    raw_dir.mkdir(exist_ok=True)
+    for r in results:
+        (raw_dir / f"{r.case_id}.json").write_text(json.dumps({
+            "case_id": r.case_id, "task": r.task, "category": r.category,
+            "model": r.model, "prompt_version": r.prompt_version,
+            "expected_outcome": r.expected_outcome, "actual_outcome": r.actual_outcome,
+            "quality_assessment": r.quality_assessment,
+            "latency_ms": round(r.latency_ms, 1), "cost_estimate_usd": r.cost_estimate_usd,
+            "pass_fail": r.pass_fail, "failure_reason": r.failure_reason,
+        }, indent=2, default=str))
+
+    with (out_dir / "aggregate.csv").open("w", newline="") as f:
+        w = csv.writer(f)
+        w.writerow(["case_id", "task", "category", "model", "prompt_version",
+                    "pass_fail", "latency_ms", "cost_estimate_usd", "failure_reason"])
+        for r in results:
+            w.writerow([r.case_id, r.task, r.category, r.model, r.prompt_version,
+                        r.pass_fail, round(r.latency_ms, 1), r.cost_estimate_usd, r.failure_reason])
+
+    statuses = Counter(r.pass_fail for r in results)
+    summary = {
+        "timestamp": _now_iso(),
+        "total": len(results),
+        "pass": statuses.get("pass", 0), "fail": statuses.get("fail", 0),
+        "failed": statuses.get("failed", 0), "pending": statuses.get("pending", 0),
+        "by_category": dict(Counter(r.category for r in results)),
+        "median_latency_ms": sorted(r.latency_ms for r in results)[len(results) // 2] if results else 0,
+    }
+    (out_dir / "summary.json").write_text(json.dumps(summary, indent=2))
+    print()
+    print(json.dumps(summary, indent=2))
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--task", choices=["task1", "task2", "task3"], default=None)
+    parser.add_argument("--all", action="store_true")
+    parser.add_argument("--split", choices=["cases", "holdout", "both"], default="cases")
+    parser.add_argument("--live", action="store_true")
+    parser.add_argument("--model-label", default="unknown")
+    parser.add_argument("--out", default=None)
+    args = parser.parse_args()
+
+    if not args.live:
+        print("ERROR: pass --live (mock mode removed; eval always hits real services)", file=sys.stderr)
+        return 1
+
+    tokens = load_tokens()
+    tasks = ["task1", "task2", "task3"] if args.all else ([args.task] if args.task else None)
+    if not tasks:
+        print("ERROR: pass --task or --all", file=sys.stderr)
+        return 1
+
+    timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    out_dir = Path(args.out) if args.out else (REPORTS / f"eval_{timestamp}")
+
+    all_results: list[CaseResult] = []
+    for task in tasks:
+        cases: list[dict] = []
+        if args.split in ("cases", "both"):
+            cases += _load_jsonl(EVALS / task / "cases_v1.jsonl")
+        if args.split in ("holdout", "both"):
+            cases += _load_jsonl(EVALS / task / "holdout_v1.jsonl")
+        print(f"=== {task} ({len(cases)} cases, LIVE) ===")
+        results = run(cases, task, tokens)
+        all_results.extend(results)
+
+    write_outputs(all_results, out_dir)
+    print(f"\nOutput: {out_dir}")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

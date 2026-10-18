@@ -1,0 +1,24 @@
+
+> task2-inbox-agent@0.1.0 build
+> tsc --noEmit
+
+src/review/service.ts(40,51): error TS2379: Argument of type '{ draft_id: string; decision: "escalate"; correction_reason: string | undefined; reviewer: string; }' is not assignable to parameter of type '{ draft_id: string; decision: "escalate" | "reject" | "approve" | "edit"; final_reply?: string; correction_reason?: string; reviewer: string; delivery_id?: string; is_qualifying?: boolean; }' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'correction_reason' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/review/service.ts(70,51): error TS2379: Argument of type '{ draft_id: string; decision: "reject"; final_reply: string; correction_reason: string | undefined; reviewer: string; }' is not assignable to parameter of type '{ draft_id: string; decision: "escalate" | "reject" | "approve" | "edit"; final_reply?: string; correction_reason?: string; reviewer: string; delivery_id?: string; is_qualifying?: boolean; }' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'correction_reason' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/review/service.ts(114,49): error TS2379: Argument of type '{ category: string; draft_id: string; delivery_id: string; generated_draft: string; final_draft: string; delivery_status: "failed" | "delivered" | "simulated_sent"; exclusion_list: string[]; disqualifying_reason: string | undefined; }' is not assignable to parameter of type 'QualifyingInput' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'disqualifying_reason' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/review/service.ts(125,49): error TS2379: Argument of type '{ draft_id: string; decision: "approve" | "edit"; final_reply: string; correction_reason: string | undefined; reviewer: string; delivery_id: string; is_qualifying: boolean; }' is not assignable to parameter of type '{ draft_id: string; decision: "escalate" | "reject" | "approve" | "edit"; final_reply?: string; correction_reason?: string; reviewer: string; delivery_id?: string; is_qualifying?: boolean; }' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'correction_reason' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/server.ts(106,50): error TS2379: Argument of type '{ draft_id: string; action: "escalate" | "reject" | "approve" | "edit"; edited_text: string | undefined; replacement_text: string | undefined; correction_reason: string | undefined; reviewer: string; delivery_target: string; exclusion_list: string[]; }' is not assignable to parameter of type 'ReviewDecisionInput' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'edited_text' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.

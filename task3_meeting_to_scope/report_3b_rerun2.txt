@@ -1,0 +1,51 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-8.3.3, pluggy-1.7.0 -- /home/sayen/projects/ai-tech-consultant/tech/bin/python3
+cachedir: .pytest_cache
+rootdir: /home/sayen/projects/ai-tech-consultant/task3_meeting_to_scope
+configfile: pytest.ini
+testpaths: tests
+plugins: asyncio-0.24.0, respx-0.21.1, anyio-4.15.1
+asyncio: mode=Mode.AUTO, default_loop_scope=function
+collecting ... collected 33 items
+
+tests/test_api.py::test_health PASSED                                    [  3%]
+tests/test_api.py::test_ingest_and_view PASSED                           [  6%]
+tests/test_api.py::test_unknown_project_returns_empty_view PASSED        [  9%]
+tests/test_api_3b.py::test_health_reports_ok PASSED                      [ 12%]
+tests/test_api_3b.py::test_unknown_proposal_404 PASSED                   [ 15%]
+tests/test_api_3b.py::test_send_unapproved_returns_409 PASSED            [ 18%]
+tests/test_chunker.py::test_short_transcript_single_chunk PASSED         [ 21%]
+tests/test_chunker.py::test_long_transcript_splits_with_overlap PASSED   [ 24%]
+tests/test_estimator.py::test_totals_match_fixture_sums PASSED           [ 27%]
+tests/test_estimator.py::test_by_task_and_by_requirement_split PASSED    [ 30%]
+tests/test_estimator.py::test_all_estimates_start_provisional PASSED     [ 33%]
+tests/test_estimator.py::test_deterministic PASSED                       [ 36%]
+tests/test_extractor_mock.py::test_mock_extractor_returns_expected_records_for_meeting_1 PASSED [ 39%]
+tests/test_extractor_mock.py::test_mock_extractor_records_have_source_refs PASSED [ 42%]
+tests/test_feasibility.py::test_existing_configuration PASSED            [ 45%]
+tests/test_feasibility.py::test_insufficient_evidence_becomes_needs_clarification PASSED [ 48%]
+tests/test_feasibility.py::test_kb_unavailable_marks_unverified PASSED   [ 51%]
+tests/test_feasibility.py::test_no_unsupported_classification_in_schema PASSED [ 54%]
+tests/test_loader.py::test_load_meeting_1 PASSED                         [ 57%]
+tests/test_loader.py::test_load_meeting_2 PASSED                         [ 60%]
+tests/test_loader.py::test_load_meeting_3 PASSED                         [ 63%]
+tests/test_merge_conflicts.py::test_meeting_1_merge_creates_two_requirements_and_one_commitment PASSED [ 66%]
+tests/test_merge_conflicts.py::test_followup_deadline_conflict_detected PASSED [ 69%]
+tests/test_merge_conflicts.py::test_meeting_2_open_question_carrier PASSED [ 72%]
+tests/test_proposal_and_approval.py::test_send_before_approve_rejected PASSED [ 75%]
+tests/test_proposal_and_approval.py::test_approve_then_send PASSED       [ 78%]
+tests/test_proposal_and_approval.py::test_pricing_is_unresolved_by_default PASSED [ 81%]
+tests/test_proposal_and_approval.py::test_proposal_contains_required_sections PASSED [ 84%]
+tests/test_schemas.py::test_requirement_requires_source_ref PASSED       [ 87%]
+tests/test_schemas.py::test_requirement_valid PASSED                     [ 90%]
+tests/test_schemas.py::test_transcript_roundtrip PASSED                  [ 93%]
+tests/test_validate_claims.py::test_all_client_stated_requirements_validate_cleanly PASSED [ 96%]
+tests/test_validate_claims.py::test_bad_quote_is_flagged PASSED          [100%]
+
+=============================== warnings summary ===============================
+../tech/lib/python3.12/site-packages/starlette/testclient.py:40
+  /home/sayen/projects/ai-tech-consultant/tech/lib/python3.12/site-packages/starlette/testclient.py:40: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = typing.Callable[[], typing.ContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================== 33 passed, 1 warning in 2.79s =========================

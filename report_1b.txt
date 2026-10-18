@@ -1,0 +1,172 @@
+/home/sayen/projects/ai-tech-consultant/tech/lib/python3.12/site-packages/pytest_asyncio/plugin.py:208: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-8.3.3, pluggy-1.7.0 -- /home/sayen/projects/ai-tech-consultant/tech/bin/python3
+cachedir: .pytest_cache
+rootdir: /home/sayen/projects/ai-tech-consultant
+configfile: pytest.ini
+plugins: asyncio-0.24.0, respx-0.21.1, anyio-4.15.1
+asyncio: mode=Mode.AUTO, default_loop_scope=None
+collecting ... collected 17 items
+
+tests/retrieval/test_embedder.py::test_mock_embedder_deterministic PASSED [  5%]
+tests/retrieval/test_embedder.py::test_mock_embedder_unit_length PASSED  [ 11%]
+tests/retrieval/test_embedder.py::test_mock_embedder_empty PASSED        [ 17%]
+tests/retrieval/test_retriever.py::test_semantic_search_returns_active_chunks FAILED [ 23%]
+tests/retrieval/test_retriever.py::test_keyword_search FAILED            [ 29%]
+tests/retrieval/test_retriever.py::test_inactive_chunks_excluded FAILED  [ 35%]
+tests/retrieval/test_vector_store.py::test_fallback_flag_is_bool FAILED  [ 41%]
+tests/retrieval/test_vector_store.py::test_upsert_and_search FAILED      [ 47%]
+tests/retrieval/test_vector_store.py::test_idempotent_upsert FAILED      [ 52%]
+tests/qa/test_citation_validator.py::test_valid_citations_pass PASSED    [ 58%]
+tests/qa/test_citation_validator.py::test_unretrieved_citation_rejected PASSED [ 64%]
+tests/qa/test_citation_validator.py::test_empty_sources_ok PASSED        [ 70%]
+tests/qa/test_pipeline.py::test_answered_with_valid_citations PASSED     [ 76%]
+tests/qa/test_pipeline.py::test_bad_citation_rejected PASSED             [ 82%]
+tests/qa/test_pipeline.py::test_no_evidence PASSED                       [ 88%]
+tests/qa/test_pipeline.py::test_model_failure_returns_failed PASSED      [ 94%]
+tests/qa/test_pipeline.py::test_mock_client_abstains PASSED              [100%]
+
+=================================== FAILURES ===================================
+__________________ test_semantic_search_returns_active_chunks __________________
+
+tmp_path = PosixPath('/tmp/pytest-of-sayen/pytest-3/test_semantic_search_returns_a0')
+
+    def test_semantic_search_returns_active_chunks(tmp_path):
+        cfg = _seed(tmp_path)
+        emb = MockEmbedder()
+        retriever = Retriever(cfg.db_path, emb)
+        store = VectorStore(cfg.db_path, emb.dim)
+        con = sqlite3.connect(cfg.db_path)
+        rows = con.execute("SELECT id, text FROM chunks").fetchall()
+        con.close()
+        vecs = emb.embed([r[1] for r in rows])
+        store.upsert_chunk_embeddings([(rows[i][0], emb.model_id, vecs[i]) for i in range(len(rows))])
+        res = retriever.search("password reset", top_k=3, mode="semantic")
+        assert res.chunks, "semantic search should return chunks"
+>       assert all(0.0 <= c.score <= 1.01 for c in res.chunks)
+E       assert False
+E        +  where False = all(<generator object test_semantic_search_returns_active_chunks.<locals>.<genexpr> at 0x7f1245ff1a40>)
+
+tests/retrieval/test_retriever.py:39: AssertionError
+_____________________________ test_keyword_search ______________________________
+
+tmp_path = PosixPath('/tmp/pytest-of-sayen/pytest-3/test_keyword_search0')
+
+    def test_keyword_search(tmp_path):
+        cfg = _seed(tmp_path)
+        emb = MockEmbedder()
+        retriever = Retriever(cfg.db_path, emb)
+        res = retriever.search("password", top_k=3, mode="keyword")
+>       assert res.chunks
+E       AssertionError: assert []
+E        +  where [] = RetrievalResult(chunks=[], mode='keyword').chunks
+
+tests/retrieval/test_retriever.py:47: AssertionError
+________________________ test_inactive_chunks_excluded _________________________
+
+tmp_path = PosixPath('/tmp/pytest-of-sayen/pytest-3/test_inactive_chunks_excluded0')
+
+    def test_inactive_chunks_excluded(tmp_path):
+        cfg = _seed(tmp_path)
+        emb = MockEmbedder()
+        retriever = Retriever(cfg.db_path, emb)
+        store = VectorStore(cfg.db_path, emb.dim)
+        con = sqlite3.connect(cfg.db_path)
+        rows = con.execute("SELECT id, text FROM chunks").fetchall()
+        con.close()
+        vecs = emb.embed([r[1] for r in rows])
+        store.upsert_chunk_embeddings([(rows[i][0], emb.model_id, vecs[i]) for i in range(len(rows))])
+        con = sqlite3.connect(cfg.db_path)
+>       con.execute("UPDATE chunks SET is_active = 0 WHERE id = ?", (rows[0][0],))
+E       sqlite3.DatabaseError: database disk image is malformed
+
+tests/retrieval/test_retriever.py:62: DatabaseError
+__________________________ test_fallback_flag_is_bool __________________________
+
+tmp_path = PosixPath('/tmp/pytest-of-sayen/pytest-3/test_fallback_flag_is_bool0')
+
+    def test_fallback_flag_is_bool(tmp_path):
+>       store = VectorStore(tmp_path / "kb.sqlite3", dim=MockEmbedder().dim)
+
+tests/retrieval/test_vector_store.py:8: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+task1_knowledge_brain/retrieval/vector_store.py:36: in __init__
+    self._bootstrap()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <task1_knowledge_brain.retrieval.vector_store.VectorStore object at 0x7f1245fd5f70>
+
+    def _bootstrap(self) -> None:
+        self.db_path.parent.mkdir(parents=True, exist_ok=True)
+        con = self._connect()
+        try:
+>           con.executescript(EMBEDDING_SCHEMA)
+E           sqlite3.OperationalError: no such table: main.chunks
+
+task1_knowledge_brain/retrieval/vector_store.py:58: OperationalError
+____________________________ test_upsert_and_search ____________________________
+
+tmp_path = PosixPath('/tmp/pytest-of-sayen/pytest-3/test_upsert_and_search0')
+
+    def test_upsert_and_search(tmp_path):
+>       store = VectorStore(tmp_path / "kb.sqlite3", dim=8)
+
+tests/retrieval/test_vector_store.py:13: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+task1_knowledge_brain/retrieval/vector_store.py:36: in __init__
+    self._bootstrap()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <task1_knowledge_brain.retrieval.vector_store.VectorStore object at 0x7f1245fd6ae0>
+
+    def _bootstrap(self) -> None:
+        self.db_path.parent.mkdir(parents=True, exist_ok=True)
+        con = self._connect()
+        try:
+>           con.executescript(EMBEDDING_SCHEMA)
+E           sqlite3.OperationalError: no such table: main.chunks
+
+task1_knowledge_brain/retrieval/vector_store.py:58: OperationalError
+____________________________ test_idempotent_upsert ____________________________
+
+tmp_path = PosixPath('/tmp/pytest-of-sayen/pytest-3/test_idempotent_upsert0')
+
+    def test_idempotent_upsert(tmp_path):
+        import sqlite3
+>       store = VectorStore(tmp_path / "kb.sqlite3", dim=4)
+
+tests/retrieval/test_vector_store.py:26: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+task1_knowledge_brain/retrieval/vector_store.py:36: in __init__
+    self._bootstrap()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <task1_knowledge_brain.retrieval.vector_store.VectorStore object at 0x7f1245fd76e0>
+
+    def _bootstrap(self) -> None:
+        self.db_path.parent.mkdir(parents=True, exist_ok=True)
+        con = self._connect()
+        try:
+>           con.executescript(EMBEDDING_SCHEMA)
+E           sqlite3.OperationalError: no such table: main.chunks
+
+task1_knowledge_brain/retrieval/vector_store.py:58: OperationalError
+=============================== warnings summary ===============================
+tech/lib/python3.12/site-packages/pydantic/_internal/_fields.py:132
+  /home/sayen/projects/ai-tech-consultant/tech/lib/python3.12/site-packages/pydantic/_internal/_fields.py:132: UserWarning: Field "model_id" in ImageRef has conflict with protected namespace "model_".
+  
+  You may be able to resolve this warning by setting `model_config['protected_namespaces'] = ()`.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/retrieval/test_retriever.py::test_semantic_search_returns_active_chunks
+FAILED tests/retrieval/test_retriever.py::test_keyword_search - AssertionErro...
+FAILED tests/retrieval/test_retriever.py::test_inactive_chunks_excluded - sql...
+FAILED tests/retrieval/test_vector_store.py::test_fallback_flag_is_bool - sql...
+FAILED tests/retrieval/test_vector_store.py::test_upsert_and_search - sqlite3...
+FAILED tests/retrieval/test_vector_store.py::test_idempotent_upsert - sqlite3...
+=================== 6 failed, 11 passed, 1 warning in 3.30s ====================

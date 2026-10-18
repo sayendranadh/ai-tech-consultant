@@ -1,0 +1,14 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-8.3.3, pluggy-1.7.0 -- /home/sayen/projects/ai-tech-consultant/tech/bin/python3
+cachedir: .pytest_cache
+rootdir: /home/sayen/projects/ai-tech-consultant
+configfile: pytest.ini
+plugins: asyncio-0.24.0, respx-0.21.1, anyio-4.15.1
+asyncio: mode=Mode.AUTO, default_loop_scope=function
+collecting ... collected 3 items
+
+tests_integration_live/test_live_a_query.py::test_live_a_query_returns_answer_with_citations SKIPPED [ 33%]
+tests_integration_live/test_live_b_inbox.py::test_live_b_task2_client_reaches_live_task1 SKIPPED [ 66%]
+tests_integration_live/test_live_c_meeting.py::test_live_c_task3_feasibility_on_live_answer SKIPPED [100%]
+
+============================== 3 skipped in 0.02s ==============================

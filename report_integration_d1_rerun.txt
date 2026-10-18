@@ -1,0 +1,150 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-8.3.3, pluggy-1.7.0 -- /home/sayen/projects/ai-tech-consultant/tech/bin/python3
+cachedir: .pytest_cache
+rootdir: /home/sayen/projects/ai-tech-consultant
+configfile: pytest.ini
+plugins: asyncio-0.24.0, respx-0.21.1, anyio-4.15.1
+asyncio: mode=Mode.AUTO, default_loop_scope=function
+collecting ... collected 7 items
+
+tests_integration/test_task1_wiring.py::test_direct_http_query_returns_fixture_answer FAILED [ 14%]
+tests_integration/test_task1_wiring.py::test_request_id_echoed PASSED    [ 28%]
+tests_integration/test_task1_wiring.py::test_request_id_generated_when_absent PASSED [ 42%]
+tests_integration/test_task1_wiring.py::test_task2_kbclient_against_live_task1 FAILED [ 57%]
+tests_integration/test_task1_wiring.py::test_task2_kbclient_insufficient_evidence FAILED [ 71%]
+tests_integration/test_task1_wiring.py::test_task3_httpkbclient_against_live_task1 FAILED [ 85%]
+tests_integration/test_task1_wiring.py::test_task3_feasibility_heuristic_on_live_answer FAILED [100%]
+
+=================================== FAILURES ===================================
+________________ test_direct_http_query_returns_fixture_answer _________________
+
+task1_process = {'admin_token': 'admin-token', 'base_url': 'http://127.0.0.1:44635', 'log_path': PosixPath('/home/sayen/projects/ai-te...integration_task1.log'), 'proc': <Popen: returncode: None args: ['/home/sayen/projects/ai-tech-consultant/tec...>, ...}
+
+    def test_direct_http_query_returns_fixture_answer(task1_process):
+        """Verification A wiring: /query in fixture mode returns answer with cited source."""
+        r = httpx.post(
+            f"{task1_process['base_url']}/query",
+            headers={"Authorization": "Bearer t2-token"},
+            json={"question": "how do i reset a password"},
+            timeout=10.0,
+        )
+>       assert r.status_code == 200, r.text
+E       AssertionError: Internal Server Error
+E       assert 500 == 200
+E        +  where 500 = <Response [500 Internal Server Error]>.status_code
+
+tests_integration/test_task1_wiring.py:47: AssertionError
+____________________ test_task2_kbclient_against_live_task1 ____________________
+
+task1_process = {'admin_token': 'admin-token', 'base_url': 'http://127.0.0.1:44635', 'log_path': PosixPath('/home/sayen/projects/ai-te...integration_task1.log'), 'proc': <Popen: returncode: None args: ['/home/sayen/projects/ai-tech-consultant/tec...>, ...}
+
+    def test_task2_kbclient_against_live_task1(task1_process):
+        """Verification B wiring: Task 2's real KBClient talks to live Task 1."""
+        out = _run_harness(
+            task1_process["base_url"],
+            task1_process["task2_token"],
+            "how do i reset a password",
+        )
+>       assert out["ok"] is True, out
+E       AssertionError: {'error': 'KBUnavailableError', 'message': 'kb unavailable after 2 attempts: kb returned 500', 'ok': False}
+E       assert False is True
+
+tests_integration/test_task1_wiring.py:78: AssertionError
+__________________ test_task2_kbclient_insufficient_evidence ___________________
+
+task1_process = {'admin_token': 'admin-token', 'base_url': 'http://127.0.0.1:44635', 'log_path': PosixPath('/home/sayen/projects/ai-te...integration_task1.log'), 'proc': <Popen: returncode: None args: ['/home/sayen/projects/ai-tech-consultant/tec...>, ...}
+
+    def test_task2_kbclient_insufficient_evidence(task1_process):
+        """Verification D wiring: unsupported question flows through Task 2's client as insufficient."""
+        out = _run_harness(
+            task1_process["base_url"],
+            task1_process["task2_token"],
+            "what is the airspeed velocity of an unladen swallow",
+        )
+>       assert out["ok"] is True, out
+E       AssertionError: {'error': 'KBUnavailableError', 'message': 'kb unavailable after 2 attempts: kb returned 500', 'ok': False}
+E       assert False is True
+
+tests_integration/test_task1_wiring.py:92: AssertionError
+__________________ test_task3_httpkbclient_against_live_task1 __________________
+
+task1_process = {'admin_token': 'admin-token', 'base_url': 'http://127.0.0.1:44635', 'log_path': PosixPath('/home/sayen/projects/ai-te...integration_task1.log'), 'proc': <Popen: returncode: None args: ['/home/sayen/projects/ai-tech-consultant/tec...>, ...}
+
+    def test_task3_httpkbclient_against_live_task1(task1_process):
+        """Verification C wiring: Task 3's HTTPKBClient talks to live Task 1."""
+        import sys
+        sys.path.insert(0, str(ROOT / "task3_meeting_to_scope"))
+        from src.kb_client import HTTPKBClient
+        client = HTTPKBClient(
+            base_url=task1_process["base_url"],
+            bearer_token=task1_process["task3_token"],
+            timeout_ms=5000,
+            max_retries=1,
+        )
+>       resp = client.query("does the product support custom theming")
+
+tests_integration/test_task1_wiring.py:107: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <src.kb_client.HTTPKBClient object at 0x733b2de335f0>
+question = 'does the product support custom theming'
+
+    def query(self, question: str) -> dict:
+        last: Exception | None = None
+        for attempt in range(self._max_retries + 1):
+            try:
+                with httpx.Client(timeout=self._timeout) as c:
+                    resp = c.post(f"{self._base}/query", headers=self._headers, json={"question": question})
+                if resp.status_code == 200:
+                    return KBQueryResponse.model_validate(resp.json()).model_dump()
+                if resp.status_code in (429, 500, 502, 503, 504):
+                    last = KBUnavailableError(f"kb status {resp.status_code}")
+                    time.sleep(0.3 * (2 ** attempt))
+                    continue
+                last = KBUnavailableError(f"kb rejected query: {resp.text[:200]}")
+                break
+            except Exception as exc:  # noqa: BLE001
+                last = KBUnavailableError(str(exc))
+                time.sleep(0.3 * (2 ** attempt))
+>       raise last or KBUnavailableError("kb unavailable")
+E       src.kb_client.KBUnavailableError: kb status 500
+
+task3_meeting_to_scope/src/kb_client.py:52: KBUnavailableError
+_______________ test_task3_feasibility_heuristic_on_live_answer ________________
+
+task1_process = {'admin_token': 'admin-token', 'base_url': 'http://127.0.0.1:44635', 'log_path': PosixPath('/home/sayen/projects/ai-te...integration_task1.log'), 'proc': <Popen: returncode: None args: ['/home/sayen/projects/ai-tech-consultant/tec...>, ...}
+
+    def test_task3_feasibility_heuristic_on_live_answer(task1_process):
+        """Verification C deeper wiring: FeasibilityAgent classifies live Task 1 answer."""
+        import sys
+        sys.path.insert(0, str(ROOT / "task3_meeting_to_scope"))
+        from src.feasibility_agent import FeasibilityAgent
+        from src.kb_client import HTTPKBClient
+        from src.schemas import Requirement, TurnRef
+        kb = HTTPKBClient(base_url=task1_process["base_url"], bearer_token=task1_process["task3_token"], timeout_ms=5000, max_retries=1)
+        agent = FeasibilityAgent(kb=kb)
+        req = Requirement(
+            requirement_id="REQ-TEST-1", project_id="project_website",
+            description="support custom theming",
+            source_meeting=1,
+            source_refs=[TurnRef(transcript_id="t", turn_id="turn-001", speaker="s", quote="q")],
+            provenance="client_stated",
+        )
+        check = agent.check(req)
+>       assert check.classification == "existing_configuration", check
+E       AssertionError: FeasibilityCheck(requirement_id='REQ-TEST-1', project_id='project_website', classification='needs_clarification', status='unverified', evidence_chunk_ids=[], kb_status='unavailable', notes='kb unavailable: kb status 500', model_id='feasibility/heuristic-v1', prompt_version='v1', checked_at=datetime.datetime(2026, 10, 18, 15, 16, 54, 736255, tzinfo=datetime.timezone.utc))
+E       assert 'needs_clarification' == 'existing_configuration'
+E         
+E         - existing_configuration
+E         + needs_clarification
+
+tests_integration/test_task1_wiring.py:130: AssertionError
+------------------------------ Captured log call -------------------------------
+WARNING  src.feasibility_agent:feasibility_agent.py:58 kb query failed: kb status 500
+=========================== short test summary info ============================
+FAILED tests_integration/test_task1_wiring.py::test_direct_http_query_returns_fixture_answer
+FAILED tests_integration/test_task1_wiring.py::test_task2_kbclient_against_live_task1
+FAILED tests_integration/test_task1_wiring.py::test_task2_kbclient_insufficient_evidence
+FAILED tests_integration/test_task1_wiring.py::test_task3_httpkbclient_against_live_task1
+FAILED tests_integration/test_task1_wiring.py::test_task3_feasibility_heuristic_on_live_answer
+========================= 5 failed, 2 passed in 10.23s =========================

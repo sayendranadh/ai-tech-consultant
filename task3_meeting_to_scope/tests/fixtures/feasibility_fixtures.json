@@ -1,0 +1,40 @@
+{
+  "REQ-meeting_1_website-001": {
+    "kb_status": "answered",
+    "kb_answer": "Homepages can be freely redesigned with the built-in site builder; see Site > Design > Homepage.",
+    "kb_sources": [
+      {"title": "Homepage customization", "url": "https://support.brilliantdirectories.com/article/homepage", "section": "Site Design", "chunk_id": 101}
+    ],
+    "escalation_required": false
+  },
+  "REQ-meeting_1_website-002": {
+    "kb_status": "answered",
+    "kb_answer": "Contact forms are supported natively. Submissions can be routed to any email address.",
+    "kb_sources": [
+      {"title": "Contact form routing", "url": "https://support.brilliantdirectories.com/article/contact-form", "section": "Forms", "chunk_id": 102}
+    ],
+    "escalation_required": false
+  },
+  "REQ-meeting_3_followup-001": {
+    "kb_status": "answered",
+    "kb_answer": "Contact form routing is configurable; the destination email is set in Forms > Settings.",
+    "kb_sources": [
+      {"title": "Contact form settings", "url": "https://support.brilliantdirectories.com/article/contact-form", "section": "Settings", "chunk_id": 102}
+    ],
+    "escalation_required": false
+  },
+  "REQ-meeting_3_followup-002": {
+    "kb_status": "insufficient_evidence",
+    "kb_answer": "",
+    "kb_sources": [],
+    "escalation_required": true
+  },
+  "REQ-meeting_3_followup-003": {
+    "kb_status": "answered",
+    "kb_answer": "Homepages can be freely redesigned with the built-in site builder.",
+    "kb_sources": [
+      {"title": "Homepage customization", "url": "https://support.brilliantdirectories.com/article/homepage", "section": "Site Design", "chunk_id": 101}
+    ],
+    "escalation_required": false
+  }
+}

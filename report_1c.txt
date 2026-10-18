@@ -1,0 +1,63 @@
+/home/sayen/projects/ai-tech-consultant/tech/lib/python3.12/site-packages/pytest_asyncio/plugin.py:208: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-8.3.3, pluggy-1.7.0 -- /home/sayen/projects/ai-tech-consultant/tech/bin/python3
+cachedir: .pytest_cache
+rootdir: /home/sayen/projects/ai-tech-consultant
+configfile: pytest.ini
+plugins: asyncio-0.24.0, respx-0.21.1, anyio-4.15.1
+asyncio: mode=Mode.AUTO, default_loop_scope=None
+collecting ... collected 1 item / 4 errors
+
+==================================== ERRORS ====================================
+_________________ ERROR collecting tests/service/test_auth.py __________________
+ImportError while importing test module '/home/sayen/projects/ai-tech-consultant/tests/service/test_auth.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+tests/service/test_auth.py:1: in <module>
+    from .conftest import hdr
+E   ImportError: attempted relative import with no known parent package
+______________ ERROR collecting tests/service/test_escalations.py ______________
+ImportError while importing test module '/home/sayen/projects/ai-tech-consultant/tests/service/test_escalations.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+tests/service/test_escalations.py:1: in <module>
+    from .conftest import hdr
+E   ImportError: attempted relative import with no known parent package
+____________ ERROR collecting tests/service/test_ingestion_jobs.py _____________
+ImportError while importing test module '/home/sayen/projects/ai-tech-consultant/tests/service/test_ingestion_jobs.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+tests/service/test_ingestion_jobs.py:1: in <module>
+    from .conftest import hdr
+E   ImportError: attempted relative import with no known parent package
+_________________ ERROR collecting tests/service/test_query.py _________________
+ImportError while importing test module '/home/sayen/projects/ai-tech-consultant/tests/service/test_query.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+tests/service/test_query.py:1: in <module>
+    from .conftest import hdr
+E   ImportError: attempted relative import with no known parent package
+=============================== warnings summary ===============================
+tech/lib/python3.12/site-packages/starlette/testclient.py:40
+  /home/sayen/projects/ai-tech-consultant/tech/lib/python3.12/site-packages/starlette/testclient.py:40: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = typing.Callable[[], typing.ContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+ERROR tests/service/test_auth.py
+ERROR tests/service/test_escalations.py
+ERROR tests/service/test_ingestion_jobs.py
+ERROR tests/service/test_query.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 4 errors during collection !!!!!!!!!!!!!!!!!!!!
+========================= 1 warning, 4 errors in 0.18s =========================
